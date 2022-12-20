@@ -6,6 +6,7 @@ import Col from 'react-bootstrap/Col';
 import Product from '../components/Product';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import Slider from '../components/slider';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -42,7 +43,10 @@ export default function HomeScreens() {
   console.log('pro', products);
   return (
     <div>
-      <h1>List of products</h1>
+      <div className="slider">
+        <Slider />
+      </div>
+
       <div className="products">
         {loading ? (
           <LoadingBox />
