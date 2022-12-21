@@ -36,7 +36,6 @@ $ npm start
 $ cd frontend
 $ npm install
 $ npm start
-<<<<<<< HEAD
 ```
 
 ### 6. Seed Users and Products
@@ -55,4 +54,3 @@ $ npm start
 7. Admin Login
    Run http://localhost:3000/signin
    Enter admin email and password and click signin
-   > > > > > > > 08065621c4e90a097a1a2120a70233cef47c62ba
