@@ -13,7 +13,7 @@ function Slider() {
       <Carousel.Item>
         <img
           className="d-block w-100"
-          src="https://soliloquywp.com/wp-content/uploads/2013/05/action-backlit-beach-1046896-1200x450_c.jpg"
+          src="https://www.creatopy.com/blog/wp-content/uploads/2018/11/photo-slideshow-example-1024x510.png"
           alt="First slide"
         />
         <Carousel.Caption>
@@ -24,7 +24,7 @@ function Slider() {
       <Carousel.Item>
         <img
           className="d-block w-100"
-          src="https://apvs.in/wp-content/uploads/2015/09/slider_landing_01.jpg"
+          src="https://www.creatopy.com/blog/wp-content/uploads/2018/11/sportsware-slider-example-1024x495.png"
           alt="Second slide"
         />
 
@@ -36,7 +36,7 @@ function Slider() {
       <Carousel.Item>
         <img
           className="d-block w-100"
-          src="https://www.wonderplugin.com/wp-content/uploads/2019/05/tutorial-city-900x288.jpg"
+          src="https://www.creatopy.com/blog/wp-content/uploads/2018/11/makeup-slideshow-inspiration-1024x424.png"
           alt="Third slide"
         />
 
