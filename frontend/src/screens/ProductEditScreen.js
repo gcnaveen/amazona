@@ -10,6 +10,7 @@ import MessageBox from '../components/MessageBox';
 import Button from 'react-bootstrap/Button';
 import { toast } from 'react-toastify';
 import ListGroup from 'react-bootstrap/ListGroup';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -61,6 +62,7 @@ export default function ProductEditScreen() {
   const [countInStock, setCountInStock] = useState('');
   const [brand, setBrand] = useState('');
   const [description, setDescription] = useState('');
+  const [productDiscountedPrice, setProductDiscountedPrice] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,6 +78,7 @@ export default function ProductEditScreen() {
         setCountInStock(data.countInStock);
         setBrand(data.brand);
         setDescription(data.description);
+        setProductDiscountedPrice(data.productDiscountedPrice);
         dispatch({ type: 'FETCH_SUCCESS' });
       } catch (err) {
         dispatch({
@@ -104,6 +107,7 @@ export default function ProductEditScreen() {
           brand,
           countInStock,
           description,
+          productDiscountedPrice,
         },
         {
           headers: { Authorization: `Bearer ${userInfo.token}` },
@@ -156,6 +160,9 @@ export default function ProductEditScreen() {
 
   return (
     <Container className="small-container">
+      <Helmet>
+        <title>Edit Product ${productId}</title>
+      </Helmet>
       <h1>Edit Product {productId}</h1>
 
       {loading ? (
@@ -246,6 +253,14 @@ export default function ProductEditScreen() {
             <Form.Control
               value={countInStock}
               onChange={(e) => setCountInStock(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="countInStock">
+            <Form.Label>Discount Price</Form.Label>
+            <Form.Control
+              value={productDiscountedPrice}
+              onChange={(e) => setProductDiscountedPrice(e.target.value)}
               required
             />
           </Form.Group>

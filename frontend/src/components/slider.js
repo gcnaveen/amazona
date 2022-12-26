@@ -36,7 +36,7 @@ function Slider() {
       <Carousel.Item>
         <img
           className="d-block w-100"
-          src="https://www.creatopy.com/blog/wp-content/uploads/2018/11/makeup-slideshow-inspiration-1024x424.png"
+          src="https://www.creatopy.com/blog/wp-content/uploads/2018/11/responsove-image-slider-example-1024x552.png"
           alt="Third slide"
         />
 

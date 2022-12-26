@@ -53,16 +53,58 @@ main {
   border-bottom: 0.2rem solid #f08000;
   color: #f08000;
 }
+
 .text-bold {
   font-weight: bold;
+  color: 'black';
 }
 button.thumbnail {
   padding: 0;
 }
 .slider {
-  height: 300px;
+  height: 400px;
   width: 100%;
-  border: 1px solid black;
+  margin-bottom: 20%;
+  /* border: 1px solid black; */
+}
+.orders-img {
+  height: 100px;
+  width: auto;
+}
+.footer {
+  padding-top: 60px;
+  padding-bottom: 30px;
+  background: black;
+}
+.footer__text {
+  line-height: 30px;
+  color: #fff;
+}
+.footer__quick-links {
+  background: transparent !important;
+  color: #fff;
+}
+.rows {
+  background: black;
+  padding-top: 10px;
+}
+.footer__quick-links ul li a {
+  color: rgba(255, 255, 255, 0.735);
+}
+.quick__links-title {
+  margin-bottom: 20px;
+  color: #fff;
+  font-size: 1.1rem;
+}
+.catagory-div {
+  display: flex;
+  text-align: center;
+  padding-left: 160px;
+  padding-top: 5px;
+  font-size: 15px;
+  color: white;
+  background: rgb(37 50 50);
+  height: 37px;
 }
 /* sidebar */
 .navbar-brand {

@@ -8,6 +8,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Helmet } from 'react-helmet-async';
 
 export default function CartScreen() {
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ export default function CartScreen() {
   };
   return (
     <div>
+      <Helmet>
+        <title>Shopping Cart</title>
+      </Helmet>
       <h1>Shopping Cart</h1>
       <Row>
         <Col md={8}>

@@ -6,6 +6,7 @@ import MessageBox from '../components/MessageBox';
 import { Store } from '../Store';
 import { getError } from '../utils';
 import Button from 'react-bootstrap/esm/Button';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -50,6 +51,9 @@ export default function OrderHistoryScreen() {
   }, [userInfo]);
   return (
     <div>
+      <Helmet>
+        <title>Order History</title>
+      </Helmet>
       <h1>Order History</h1>
       {loading ? (
         <LoadingBox></LoadingBox>
@@ -59,7 +63,7 @@ export default function OrderHistoryScreen() {
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>IMAGE</th>
               <th>DATE</th>
               <th>TOTAL</th>
               <th>PAID</th>
@@ -70,7 +74,14 @@ export default function OrderHistoryScreen() {
           <tbody>
             {orders.map((order) => (
               <tr key={order._id}>
-                <td>{order._id}</td>
+                <td>
+                  {' '}
+                  <img
+                    src={order?.orderItems?.map((a) => a.image)}
+                    alt=""
+                    className="orders-img"
+                  />
+                </td>
                 <td>{order.createdAt.substring(0, 10)}</td>
                 <td>{order.totalPrice.toFixed(2)}</td>
                 <td>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</td>

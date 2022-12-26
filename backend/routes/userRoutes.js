@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import expressAsyncHandler from 'express-async-handler';
 import User from '../models/userModel.js';
 import { isAuth, isAdmin, generateToken } from '../utils.js';
+import Otp from '../models/otpModel.js';
 
 const userRouter = express.Router();
 
@@ -41,10 +42,12 @@ userRouter.put(
       if (req.body.password) {
         user.password = bcrypt.hashSync(req.body.password, 8);
       }
+      user.phone = req.body.phone || user.phone;
 
       const updatedUser = await user.save();
       res.send({
         _id: updatedUser._id,
+        phone: updatedUser.phone,
         name: updatedUser.name,
         email: updatedUser.email,
         isAdmin: updatedUser.isAdmin,
@@ -65,7 +68,26 @@ userRouter.put(
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
+      user.phone = req.body.phone || user.phone;
       user.isAdmin = Boolean(req.body.isAdmin);
+      const updatedUser = await user.save();
+      res.send({ message: 'User Updated', user: updatedUser });
+    } else {
+      res.status(404).send({ message: 'User Not Found' });
+    }
+  })
+);
+
+userRouter.put(
+  '/reset-password',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      user.email = req.body.email || user.email;
+      if (req.body.password) {
+        user.password = bcrypt.hashSync(req.body.password, 8);
+      }
       const updatedUser = await user.save();
       res.send({ message: 'User Updated', user: updatedUser });
     } else {
@@ -102,6 +124,7 @@ userRouter.post(
           _id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone,
           isAdmin: user.isAdmin,
           token: generateToken(user),
         });
@@ -118,6 +141,7 @@ userRouter.post(
     const newUser = new User({
       name: req.body.name,
       email: req.body.email,
+      phone: req.body.phone,
       password: bcrypt.hashSync(req.body.password),
     });
     const user = await newUser.save();
@@ -125,10 +149,62 @@ userRouter.post(
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       isAdmin: user.isAdmin,
       token: generateToken(user),
     });
   })
 );
 
+// userRouter.post(
+//   '/email-send',
+//   expressAsyncHandler(async (req, res) => {
+//     let data = await User.findOne({ email: req.body.email });
+//     console.log(data);
+//     const responseType = {};
+//     if (data) {
+//       let otpCode = Math.floor(Math.random() * 10000 + 1);
+//       let otpData = new Otp({
+//         email: req.body.email,
+//         code: otpCode,
+//         expiredAt: new Date().getTime() + 300 * 1000,
+//       });
+//       let otpRespond = await otpData.save();
+//       responseType.statusText = 'Success';
+//       responseType.message = 'Please check yoyur email id';
+//     } else {
+//       responseType.statusText = 'error';
+//       responseType.message = 'Email Id not Exist';
+//     }
+//     res.status(200).json(responseType);
+//   })
+// );
+// userRouter.post(
+//   '/change-password',
+//   expressAsyncHandler(async (req, res) => {
+//     const data = await Otp.find({
+//       email: req.body.email,
+//       code: req.body.otpCode,
+//     });
+//     const response = {};
+//     if (data) {
+//       let currentTime = new Date().getTime();
+//       let diff = data.expireIn - currentTime;
+//       if (diff < 0) {
+//         response.message = 'Token Expire';
+//         res.statusText = 'error';
+//       } else {
+//         let user = await User.findOne({ email: req.body.email });
+//         user.password = req.body.password;
+//         user.save();
+//         response.message = 'Password changed successfully';
+//         response.statusText = 'Success';
+//       }
+//     } else {
+//       response.message = 'Invalid otp';
+//       response.statusText = 'error';
+//     }
+//     res.status(200).json(response);
+//   })
+// );
 export default userRouter;

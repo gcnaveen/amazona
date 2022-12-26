@@ -11,6 +11,7 @@ import CheckoutSteps from '../components/CheckoutSteps';
 import { toast } from 'react-toastify';
 import { getError } from '../utils';
 import LoadingBox from '../components/LoadingBox';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -32,14 +33,21 @@ export default function PlaceOrderScreen() {
   });
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
-
+  console.log('cart', state);
   const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100; // 123.2345 => 123.23
   cart.itemsPrice = round2(
     cart.cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
   );
+  cart.discountPrice = round2(
+    cart.cartItems.reduce(
+      (a, c) => a + c.quantity * c.productDiscountedPrice,
+      0
+    )
+  );
   cart.shippingPrice = cart.itemsPrice > 100 ? round2(0) : round2(10);
   cart.taxPrice = round2(0.15 * cart.itemsPrice);
-  cart.totalPrice = cart.itemsPrice + cart.shippingPrice + cart.taxPrice;
+  cart.totalPrice =
+    cart.itemsPrice + cart.shippingPrice + cart.taxPrice - cart.discountPrice;
 
   const placeOrderHandler = async () => {
     try {
@@ -81,7 +89,9 @@ export default function PlaceOrderScreen() {
   return (
     <div>
       <CheckoutSteps step1 step2 step3 step4></CheckoutSteps>
-
+      <Helmet>
+        <title>Preview Order</title>
+      </Helmet>
       <h1 className="my-3">Preview Order</h1>
       <Row>
         <Col md={8}>
@@ -156,6 +166,12 @@ export default function PlaceOrderScreen() {
                   <Row>
                     <Col>Tax</Col>
                     <Col>Rs.{cart.taxPrice.toFixed(2)}</Col>
+                  </Row>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <Row>
+                    <Col>Discount Price</Col>
+                    <Col>Rs.{cart.discountPrice.toFixed(2)}</Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>

@@ -5,6 +5,7 @@ import { Store } from '../Store';
 import { toast } from 'react-toastify';
 import { getError } from '../utils';
 import axios from 'axios';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -62,6 +63,9 @@ export default function ProfileScreen() {
 
   return (
     <div className="container small-container">
+      <Helmet>
+        <title>User Profile</title>
+      </Helmet>
       <h1 className="my-3">User Profile</h1>
       <form onSubmit={submitHandler}>
         <Form.Group className="mb-3" controlId="name">

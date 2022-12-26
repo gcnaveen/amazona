@@ -11,6 +11,7 @@ import MessageBox from '../components/MessageBox';
 import Button from 'react-bootstrap/Button';
 import Product from '../components/Product';
 import LinkContainer from 'react-router-bootstrap/LinkContainer';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -81,6 +82,7 @@ export default function SearchScreen() {
   const order = sp.get('order') || 'newest';
   const page = sp.get('page') || 1;
 
+  // console.log('in side search', category, page);
   const [{ loading, error, products, pages, countProducts }, dispatch] =
     useReducer(reducer, {
       loading: true,
@@ -130,74 +132,86 @@ export default function SearchScreen() {
     <div>
       <Row>
         <Col md={3}>
-          <h3>Department</h3>
+          <Helmet>
+            <title>Search Products</title>
+          </Helmet>
           <div>
-            <ul>
-              <li>
-                <Link
-                  className={'all' === category ? 'text-bold' : ''}
-                  to={getFilterUrl({ category: 'all' })}
-                >
-                  Any
-                </Link>
-              </li>
-              {categories.map((c) => (
-                <li key={c}>
+            <h3>Catageries</h3>
+            <div>
+              <ul style={{ listStyle: 'none' }}>
+                <li>
                   <Link
-                    className={c === category ? 'text-bold' : ''}
-                    to={getFilterUrl({ category: c })}
+                    className={'all' === category ? 'text-bold' : ''}
+                    to={getFilterUrl({ category: 'all' })}
+                    style={{ color: 'black' }}
                   >
-                    {c}
+                    Any
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3>Price</h3>
-            <ul>
-              <li>
-                <Link
-                  className={'all' === price ? 'text-bold' : ''}
-                  to={getFilterUrl({ price: 'all' })}
-                >
-                  Any
-                </Link>
-              </li>
-              {prices.map((p) => (
-                <li key={p.value}>
+                {categories.map((c) => (
+                  <li key={c}>
+                    <Link
+                      className={c === category ? 'text-bold' : ''}
+                      to={getFilterUrl({ category: c })}
+                      style={{ color: 'black' }}
+                    >
+                      {c}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Price</h3>
+              <ul style={{ listStyle: 'none' }}>
+                <li>
                   <Link
-                    to={getFilterUrl({ price: p.value })}
-                    className={p.value === price ? 'text-bold' : ''}
+                    className={'all' === price ? 'text-bold' : ''}
+                    to={getFilterUrl({ price: 'all' })}
+                    style={{ color: 'black' }}
                   >
-                    {p.name}
+                    Any
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3>Avg. Customer Review</h3>
-            <ul>
-              {ratings.map((r) => (
-                <li key={r.name}>
+                {prices.map((p) => (
+                  <li key={p.value}>
+                    <Link
+                      to={getFilterUrl({ price: p.value })}
+                      className={p.value === price ? 'text-bold' : ''}
+                      style={{ color: 'black' }}
+                    >
+                      {p.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3>Avg. Customer Review</h3>
+              <ul style={{ listStyle: 'none' }}>
+                {ratings.map((r) => (
+                  <li key={r.name}>
+                    <Link
+                      to={getFilterUrl({ rating: r.rating })}
+                      className={
+                        `${r.rating}` === `${rating}` ? 'text-bold' : ''
+                      }
+                      style={{ color: 'black' }}
+                    >
+                      <Rating caption={' & up'} rating={r.rating}></Rating>
+                    </Link>
+                  </li>
+                ))}
+                <li>
                   <Link
-                    to={getFilterUrl({ rating: r.rating })}
-                    className={`${r.rating}` === `${rating}` ? 'text-bold' : ''}
+                    to={getFilterUrl({ rating: 'all' })}
+                    className={rating === 'all' ? 'text-bold' : ''}
                   >
-                    <Rating caption={' & up'} rating={r.rating}></Rating>
+                    <Rating caption={' & up'} rating={0}></Rating>
                   </Link>
                 </li>
-              ))}
-              <li>
-                <Link
-                  to={getFilterUrl({ rating: 'all' })}
-                  className={rating === 'all' ? 'text-bold' : ''}
-                >
-                  <Rating caption={' & up'} rating={0}></Rating>
-                </Link>
-              </li>
-            </ul>
+              </ul>
+            </div>
           </div>
         </Col>
         <Col md={9}>

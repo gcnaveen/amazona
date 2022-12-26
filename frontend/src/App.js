@@ -33,7 +33,9 @@ import ProductEditScreen from './screens/ProductEditScreen';
 import OrderListScreen from './screens/OrderListScreen';
 import UserListScreen from './screens/UserListScreen';
 import UserEditScreen from './screens/UserEditScreen';
-// import MapScreen from './screens/MapScreen';
+import MapScreen from './screens/MapScreen';
+import ForgetPasswordScreen from './screens/ForgetPasswordScreen';
+import Footer from './components/Footer';
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -59,6 +61,9 @@ function App() {
     };
     fetchCategories();
   }, []);
+
+  console.log('user', userInfo);
+
   return (
     <BrowserRouter>
       <div
@@ -90,37 +95,19 @@ function App() {
               <Navbar.Collapse id="basic-navbar-nav">
                 <SearchBox />
                 <Nav className="me-auto  w-100  justify-content-end">
-                  <Link to="/cart" className="nav-link">
-                    Cart
-                    {cart.cartItems.length > 0 && (
-                      <Badge pill bg="danger">
-                        {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
-                      </Badge>
-                    )}
-                  </Link>
-                  {userInfo ? (
-                    <NavDropdown title={userInfo.name} id="basic-nav-dropdown">
-                      <LinkContainer to="/profile">
-                        <NavDropdown.Item>User Profile</NavDropdown.Item>
-                      </LinkContainer>
-                      <LinkContainer to="/orderhistory">
-                        <NavDropdown.Item>Order History</NavDropdown.Item>
-                      </LinkContainer>
-                      <NavDropdown.Divider />
-                      <Link
-                        className="dropdown-item"
-                        to="#signout"
-                        onClick={signoutHandler}
-                      >
-                        Sign Out
-                      </Link>
-                    </NavDropdown>
-                  ) : (
-                    <Link className="nav-link" to="/signin">
-                      Sign In
+                  {userInfo && userInfo.isAdmin ? null : (
+                    <Link to="/cart" className="nav-link">
+                      <i className="fas fa-shopping-cart"></i>
+                      Cart
+                      {cart.cartItems.length > 0 && (
+                        <Badge pill bg="danger">
+                          {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
+                        </Badge>
+                      )}
                     </Link>
                   )}
-                  {userInfo && userInfo.isAdmin && (
+
+                  {userInfo && userInfo?.isAdmin ? (
                     <NavDropdown title="Admin" id="admin-nav-dropdown">
                       <LinkContainer to="/admin/dashboard">
                         <NavDropdown.Item>Dashboard</NavDropdown.Item>
@@ -134,13 +121,79 @@ function App() {
                       <LinkContainer to="/admin/users">
                         <NavDropdown.Item>Users</NavDropdown.Item>
                       </LinkContainer>
+                      <LinkContainer to="/profile">
+                        <NavDropdown.Item>Admin Profile</NavDropdown.Item>
+                      </LinkContainer>
+                      <NavDropdown.Divider />
+                      <Link
+                        className="dropdown-item"
+                        to="#signout"
+                        onClick={signoutHandler}
+                      >
+                        Sign Out
+                      </Link>
                     </NavDropdown>
+                  ) : userInfo ? (
+                    <div>
+                      <NavDropdown
+                        title={userInfo.name}
+                        id="basic-nav-dropdown"
+                      >
+                        <LinkContainer to="/profile">
+                          <NavDropdown.Item>User Profile</NavDropdown.Item>
+                        </LinkContainer>
+
+                        <LinkContainer to="/orderhistory">
+                          <NavDropdown.Item>Order History</NavDropdown.Item>
+                        </LinkContainer>
+
+                        <NavDropdown.Divider />
+                        <Link
+                          className="dropdown-item"
+                          to="#signout"
+                          onClick={signoutHandler}
+                        >
+                          Sign Out
+                        </Link>
+                      </NavDropdown>
+                    </div>
+                  ) : (
+                    <Link className="nav-link" to="/signin">
+                      <i className="fas fa-user"></i>
+                      Sign In
+                    </Link>
                   )}
                 </Nav>
               </Navbar.Collapse>
             </Container>
           </Navbar>
         </header>
+        <div className="catagory-div">
+          {categories.map((category) => (
+            <Nav.Item key={category}>
+              <LinkContainer
+                to={`/search?category=${category}`}
+                onClick={() => setSidebarIsOpen(false)}
+              >
+                <Nav.Link>{category} &nbsp; &nbsp;</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            // <p>{category}</p>
+          ))}
+        </div>
+        {/* <div>
+          {' '}
+          {categories.map((category) => (
+            <Nav.Item key={category}>
+              <LinkContainer
+                to={`/search?category=${category}`}
+                onClick={() => setSidebarIsOpen(false)}
+              >
+                <Nav.Link>{category}</Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+          ))}
+        </div> */}
         <div
           className={
             sidebarIsOpen
@@ -172,6 +225,10 @@ function App() {
               <Route path="/signin" element={<SigninScreen />} />
               <Route path="/signup" element={<SignupScreen />} />
               <Route
+                path="/reset-password"
+                element={<ForgetPasswordScreen />}
+              />
+              <Route
                 path="/profile"
                 element={
                   <ProtectedRoute>
@@ -201,6 +258,14 @@ function App() {
                 path="/shipping"
                 element={<ShippingAddressScreen />}
               ></Route>
+              <Route
+                path="/map"
+                element={
+                  <ProtectedRoute>
+                    <MapScreen />
+                  </ProtectedRoute>
+                }
+              />
               {/* Admin Routes */}
               <Route
                 path="/admin/dashboard"
@@ -250,21 +315,15 @@ function App() {
                   </AdminRoute>
                 }
               ></Route>
-              {/* <Route
-                path="/map"
-                element={
-                  <ProtectedRoute>
-                    <MapScreen />
-                  </ProtectedRoute>
-                }
-              /> */}
               <Route path="/payment" element={<PaymentMethodScreen />}></Route>
               <Route path="/" element={<HomeScreen />} />
             </Routes>
           </Container>
         </main>
         <footer>
-          <div className="text-center">All rights reserved</div>
+          <div className="text-center " style={{ paddingTop: ' 10px' }}>
+            <Footer />
+          </div>
         </footer>
       </div>
     </BrowserRouter>

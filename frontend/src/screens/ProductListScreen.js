@@ -117,6 +117,7 @@ export default function ProductListScreen() {
     }
   };
 
+  console.log('in side the prices', products);
   const deleteHandler = async (product) => {
     if (window.confirm('Are you sure to delete?')) {
       try {
@@ -174,6 +175,7 @@ export default function ProductListScreen() {
                   <td>{product._id}</td>
                   <td>{product.name}</td>
                   <td>{product.price}</td>
+                  {/* <td>{product.productDiscountedPrice}</td> */}
                   <td>{product.category}</td>
                   <td>{product.brand}</td>
                   <td>

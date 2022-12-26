@@ -4,6 +4,7 @@ import Button from 'react-bootstrap/Button';
 import { useNavigate } from 'react-router-dom';
 import { Store } from '../Store';
 import CheckoutSteps from '../components/CheckoutSteps';
+import { Helmet } from 'react-helmet-async';
 
 export default function ShippingAddressScreen() {
   const navigate = useNavigate();
@@ -58,6 +59,9 @@ export default function ShippingAddressScreen() {
     <div>
       <CheckoutSteps step1 step2></CheckoutSteps>
       <div className="container small-container">
+        <Helmet>
+          <title>Shipping Address</title>
+        </Helmet>
         <h1 className="my-3">Shipping Address</h1>
         <Form onSubmit={submitHandler}>
           <Form.Group className="mb-3" controlId="fullName">

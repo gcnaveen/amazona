@@ -25,6 +25,7 @@ productRouter.post(
       countInStock: 0,
       rating: 0,
       numReviews: 0,
+      productDiscountedPrice: 0,
       description: 'sample description',
     });
     const product = await newProduct.save();
@@ -49,6 +50,7 @@ productRouter.put(
       product.brand = req.body.brand;
       product.countInStock = req.body.countInStock;
       product.description = req.body.description;
+      product.productDiscountedPrice = req.body.productDiscountedPrice;
       await product.save();
       res.send({ message: 'Product Updated' });
     } else {
@@ -108,7 +110,7 @@ productRouter.post(
   })
 );
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 50;
 
 productRouter.get(
   '/admin',

@@ -59,7 +59,7 @@ export default function Rating(props) {
         />
       </span>
       {props.caption ? (
-        <span>{props.caption}</span>
+        <span style={{ color: 'black' }}>{props.caption}</span>
       ) : (
         <span>{' ' + props.numReviews + ' reviews'}</span>
       )}

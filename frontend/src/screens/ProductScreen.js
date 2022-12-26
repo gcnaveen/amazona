@@ -21,6 +21,7 @@ import { Store } from '../Store';
 import { toast } from 'react-toastify';
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -121,7 +122,7 @@ export default function ProductScreen() {
       dispatch({ type: 'CREATE_FAIL' });
     }
   };
-  console.log('profuct', product);
+  console.log('product', product);
   return loading ? (
     <LoadingBox />
   ) : error ? (
@@ -139,6 +140,9 @@ export default function ProductScreen() {
         <Col md={3}>
           <ListGroup variant="flush">
             <ListGroup.Item>
+              <Helmet>
+                <title>{product.name}</title>
+              </Helmet>
               <h1>{product.name} </h1>
             </ListGroup.Item>
             <ListGroup.Item>
@@ -176,6 +180,7 @@ export default function ProductScreen() {
                   <Row>
                     <Col>Price:</Col>
                     <Col>Rs.{product.price}</Col>
+                    <Col>Rs. {product.productDiscountedPrice} </Col>
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
@@ -193,9 +198,11 @@ export default function ProductScreen() {
                 {product.countInStock > 0 && (
                   <ListGroup.Item>
                     <div className="d-grid">
-                      <Button onClick={addToCartHandler} variant="primary">
-                        Add to Cart
-                      </Button>
+                      {!userInfo?.isAdmin && (
+                        <Button onClick={addToCartHandler} variant="primary">
+                          Add to Cart
+                        </Button>
+                      )}
                     </div>
                   </ListGroup.Item>
                 )}

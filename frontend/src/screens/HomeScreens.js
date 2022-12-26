@@ -6,6 +6,7 @@ import Product from '../components/Product';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import Slider from '../components/slider';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -42,6 +43,9 @@ export default function HomeScreens() {
   console.log('pro', products);
   return (
     <div>
+      <Helmet>
+        <title>Amazon</title>
+      </Helmet>
       <div className="slider">
         <Slider />
       </div>
@@ -55,7 +59,14 @@ export default function HomeScreens() {
           <Row>
             {products.map((product) => {
               return (
-                <Col key={product.slug} sm={6} md={4} lg={3} className="md-3">
+                <Col
+                  key={product.slug}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  className="md-3"
+                  style={{ paddingBottom: '10px' }}
+                >
                   <Product product={product} />
                 </Col>
               );

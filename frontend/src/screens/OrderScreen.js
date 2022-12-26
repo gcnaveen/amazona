@@ -12,6 +12,7 @@ import { Store } from '../Store';
 import { getError } from '../utils';
 import { toast } from 'react-toastify';
 import Button from 'react-bootstrap/Button';
+import { Helmet } from 'react-helmet-async';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -62,7 +63,7 @@ export default function OrderScreen() {
     successPay: false,
     loadingPay: false,
   });
-
+  console.log('order', order);
   useEffect(() => {
     const fetchOrder = async () => {
       try {
@@ -111,6 +112,9 @@ export default function OrderScreen() {
     <MessageBox variant="danger">{error}</MessageBox>
   ) : (
     <div>
+      <Helmet>
+        <title>Order {orderId}</title>
+      </Helmet>
       <h1 className="my-3">Order {orderId}</h1>
       <Row>
         <Col md={8}>
@@ -148,7 +152,7 @@ export default function OrderScreen() {
               <Card.Text>
                 <strong>Method:</strong> {order.paymentMethod}
               </Card.Text>
-              {order.isPaid ? (
+              {order.isPaid || order.paymentMethod === 'Cash On Delivery' ? (
                 <MessageBox variant="success">
                   Paid at {order.paidAt}
                 </MessageBox>
@@ -217,16 +221,19 @@ export default function OrderScreen() {
                     </Col>
                   </Row>
                 </ListGroup.Item>
-                {userInfo.isAdmin && order.isPaid && !order.isDelivered && (
-                  <ListGroup.Item>
-                    {loadingDeliver && <LoadingBox></LoadingBox>}
-                    <div className="d-grid">
-                      <Button type="button" onClick={deliverOrderHandler}>
-                        Deliver Order
-                      </Button>
-                    </div>
-                  </ListGroup.Item>
-                )}
+                {userInfo.isAdmin &&
+                  (order.isPaid ||
+                    order.paymentMethod === 'Cash On Delivery') &&
+                  !order.isDelivered && (
+                    <ListGroup.Item>
+                      {loadingDeliver && <LoadingBox></LoadingBox>}
+                      <div className="d-grid">
+                        <Button type="button" onClick={deliverOrderHandler}>
+                          Deliver Order
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+                  )}
               </ListGroup>
             </Card.Body>
           </Card>

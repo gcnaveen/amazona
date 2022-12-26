@@ -5,12 +5,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { StoreProvider } from './Store';
+import { HelmetProvider } from 'react-helmet-async';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <StoreProvider>
-      <App />
+      <HelmetProvider>
+        <App />
+      </HelmetProvider>
     </StoreProvider>
   </React.StrictMode>
 );

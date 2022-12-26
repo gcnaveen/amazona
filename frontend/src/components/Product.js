@@ -26,6 +26,12 @@ export default function Product(props) {
       payload: { ...item, quantity },
     });
   };
+  const discountPrice =
+    props.product.price - props.product.productDiscountedPrice;
+  const percentage = Math.floor(
+    (props.product.productDiscountedPrice / props.product.price) * 100
+  );
+  // console.log('in side product', state.userInfo?.isAdmin);
   return (
     <Card>
       <Link to={`/product/${props.product.slug}`}>
@@ -33,6 +39,7 @@ export default function Product(props) {
           src={props.product.image}
           className="card-img-top"
           alt={props.product.name}
+          style={{ height: '261px' }}
         />
       </Link>
       <Card.Body>
@@ -43,12 +50,23 @@ export default function Product(props) {
           rating={props.product.rating}
           numReviews={props.product.numReviews}
         />
-        <Card.Text>Rs.{props.product.price}</Card.Text>
+        <Card.Text>
+          <div style={{ display: 'flex' }}>
+            <div style={{ fontSize: '30px' }}> Rs.{discountPrice} </div>
+            <div style={{ textDecoration: 'line-through', margin: '10px' }}>
+              {' '}
+              Rs.{props.product.price}
+            </div>
+            <div style={{ margin: 'auto' }}>({percentage}% off)</div>
+          </div>
+        </Card.Text>
         {props.product.countInStock === 0 ? (
-          <Button variant="light" disabled>
-            Out of stock
-          </Button>
-        ) : (
+          state?.userInfo?.isAdmin ? null : (
+            <Button variant="light" disabled>
+              Out of stock
+            </Button>
+          )
+        ) : state?.userInfo?.isAdmin ? null : (
           <Button onClick={() => addToCartHandler(props.product)}>
             Add to cart
           </Button>

@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -7,12 +7,13 @@ import Axios from 'axios';
 import { Store } from '../Store';
 import { toast } from 'react-toastify';
 import { getError } from '../utils';
-import { Helmet } from 'react-helmet-async';
 
-export default function SigninScreen() {
+export default function PasswordForm() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+
+  const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
+  const [cpassword, setCpassword] = useState('');
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { userInfo } = state;
@@ -22,9 +23,14 @@ export default function SigninScreen() {
   const redirect = redirectInUrl ? redirectInUrl : '/';
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (password !== cpassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    console.log(otp, password);
     try {
-      const { data } = await Axios.post('/api/users/signin', {
-        email,
+      const { data } = await Axios.post('/api/users/change-password', {
+        otp,
         password,
       });
       ctxDispatch({ type: 'USER_SIGNIN', payload: data });
@@ -44,22 +50,19 @@ export default function SigninScreen() {
 
   return (
     <Container className="small-container">
-      <Helmet>
-        <title>Sign In</title>
-      </Helmet>
-      <h1 className="my-3">Sign In</h1>
       <Form onSubmit={submitHandler}>
-        <Form.Group className="mb-3" controlId="email">
-          <Form.Label>Email</Form.Label>
+        <Form.Group className="mb-3" controlId="otp">
+          <Form.Label>Otp</Form.Label>
           <Form.Control
-            type="email"
+            type="otp"
+            maxLength="4"
             required
             onChange={(e) => {
-              setEmail(e.target.value);
+              setOtp(e.target.value);
             }}
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="password">
+        {/* <Form.Group className="mb-3" controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -69,19 +72,41 @@ export default function SigninScreen() {
             }}
           />
         </Form.Group>
-        <div className="mb-3">
-          <Button type="submit">Sign In</Button>
-        </div>
-        <div className="mb-3">
-          <Link to={`/reset-password?redirect=${redirect}`}>
-            Forget Password
-          </Link>
-        </div>
-        <div className="mb-3">
-          New customer?{' '}
-          <Link to={`/signup?redirect=${redirect}`}>Create your account</Link>
-        </div>
+        <Form.Group className="mb-3" controlId="cpassword">
+          <Form.Label>Confirm Password</Form.Label>
+          <Form.Control
+            type="cpassword"
+            required
+            onChange={(e) => {
+              setCpassword(e.target.value);
+            }}
+          />
+        </Form.Group> */}
+        <Form.Group className="mb-3" controlId="password">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            required
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+          />
+
+          <Form.Group className="mb-3" controlId="cpassword">
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control
+              type="password"
+              required
+              onChange={(e) => {
+                setCpassword(e.target.value);
+              }}
+            />
+          </Form.Group>
+        </Form.Group>
       </Form>
+      <div className="mb-3">
+        <Button type="submit">Change Password</Button>
+      </div>
     </Container>
   );
 }

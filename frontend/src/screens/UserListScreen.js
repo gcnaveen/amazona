@@ -4,9 +4,9 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import { Store } from '../Store';
 import { getError } from '../utils';
-import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import { toast } from 'react-toastify';
+import { Helmet } from 'react-helmet-async';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -42,7 +42,6 @@ export default function UserListScreen() {
       loading: true,
       error: '',
     });
-  const navigate = useNavigate();
 
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -89,6 +88,9 @@ export default function UserListScreen() {
 
   return (
     <div>
+      <Helmet>
+        <title>Users</title>
+      </Helmet>
       <h1>Users</h1>
       {loadingDelete && <LoadingBox></LoadingBox>}
       {loading ? (
@@ -114,13 +116,13 @@ export default function UserListScreen() {
                 <td>{user.email}</td>
                 <td>{user.isAdmin ? 'YES' : 'NO'}</td>
                 <td>
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="light"
                     onClick={() => navigate(`/admin/user/${user._id}`)}
                   >
                     Edit
-                  </Button>
+                  </Button> */}
                   &nbsp;
                   <Button
                     type="button"
