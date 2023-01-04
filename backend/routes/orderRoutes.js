@@ -108,6 +108,7 @@ orderRouter.put(
   isAuth,
   expressAsyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id);
+    console.log(order);
     if (order) {
       order.isDelivered = true;
       order.deliveredAt = Date.now();
@@ -116,6 +117,34 @@ orderRouter.put(
     } else {
       res.status(404).send({ message: 'Order Not Found' });
     }
+  })
+);
+
+orderRouter.put(
+  '/:id/address',
+  isAuth,
+  expressAsyncHandler(async (req, res) => {
+    console.log('order', req.params);
+
+    // try {
+    //   const order = await Order.findById(req.params.id);
+    //   console.log('order', order);
+    //   if (order) {
+    //     order.shippingAddress = {
+    //       address: req.body.address,
+    //       city: req.body.city,
+    //       country: req.body.country,
+    //       postalCode: req.body.postalCode,
+    //     };
+
+    //     await order.save();
+    //     res.send({ message: 'Edited Successfully' });
+    //   } else {
+    //     res.status(404).send({ message: 'Order Not Found' });
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   })
 );
 
@@ -162,7 +191,75 @@ orderRouter.put(
     }
   })
 );
+const PAGE_SIZE = 50;
+orderRouter.get(
+  '/search',
+  isAdmin,
+  expressAsyncHandler(async (req, res) => {
+    const { query } = req;
+    const pageSize = query.pageSize || PAGE_SIZE;
+    const page = query.page || 1;
+    const category = query.category || '';
+    const price = query.price || '';
+    const order = query.order || '';
+    const searchQuery = query.query || '';
 
+    const queryFilter =
+      searchQuery && searchQuery !== 'all'
+        ? {
+            name: {
+              $regex: searchQuery,
+              $options: 'i',
+            },
+          }
+        : {};
+    const categoryFilter = category && category !== 'all' ? { category } : {};
+
+    const priceFilter =
+      price && price !== 'all'
+        ? {
+            // 1-50
+            price: {
+              $gte: Number(price.split('-')[0]),
+              $lte: Number(price.split('-')[1]),
+            },
+          }
+        : {};
+    const sortOrder =
+      order === 'featured'
+        ? { featured: -1 }
+        : order === 'lowest'
+        ? { price: 1 }
+        : order === 'highest'
+        ? { price: -1 }
+        : order === 'newest'
+        ? { createdAt: -1 }
+        : { _id: -1 };
+
+    const orders = await Product.find({
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...ratingFilter,
+    })
+      .sort(sortOrder)
+      .skip(pageSize * (page - 1))
+      .limit(pageSize);
+
+    const countOrders = await Product.countDocuments({
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...ratingFilter,
+    });
+    res.send({
+      orders,
+      countOrders,
+      page,
+      pages: Math.ceil(countOrders / pageSize),
+    });
+  })
+);
 orderRouter.delete(
   '/:id',
   isAuth,

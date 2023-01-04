@@ -128,6 +128,8 @@ export default function SearchScreen() {
     const sortOrder = filter.order || order;
     return `/search?category=${filterCategory}&query=${filterQuery}&price=${filterPrice}&rating=${filterRating}&order=${sortOrder}&page=${filterPage}`;
   };
+
+  console.log('inside search', products);
   return (
     <div>
       <Row>

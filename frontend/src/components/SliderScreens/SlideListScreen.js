@@ -5,10 +5,13 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import { toast } from 'react-toastify';
-import { Store } from '../Store';
-import LoadingBox from '../components/LoadingBox';
-import MessageBox from '../components/MessageBox';
-import { getError } from '../utils';
+// import { Store } from '../Store';
+// import LoadingBox from '../components/LoadingBox';
+// import MessageBox from '../components/MessageBox';
+import { getError } from '../../utils';
+import { Store } from '../../Store';
+import LoadingBox from '../LoadingBox';
+import MessageBox from '../MessageBox';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -17,7 +20,7 @@ const reducer = (state, action) => {
     case 'FETCH_SUCCESS':
       return {
         ...state,
-        products: action.payload.products,
+        sliders: action.payload.slides,
         page: action.payload.page,
         pages: action.payload.pages,
         loading: false,
@@ -52,12 +55,12 @@ const reducer = (state, action) => {
   }
 };
 
-export default function ProductListScreen() {
+export default function SlideListScreen() {
   const [
     {
       loading,
       error,
-      products,
+      sliders,
       pages,
       loadingCreate,
       loadingDelete,
@@ -80,12 +83,14 @@ export default function ProductListScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`/api/products/admin?page=${page} `, {
+        const { data } = await axios.get(`/api/sliders/admin?page=${page} `, {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-
+        console.log(data);
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     };
     if (successDelete) {
       dispatch({ type: 'DELETE_RESET' });
@@ -93,21 +98,23 @@ export default function ProductListScreen() {
       fetchData();
     }
   }, [page, userInfo, successDelete]);
+  console.log('in side the prices', sliders);
 
   const createHandler = async () => {
     if (window.confirm('Are you sure to create?')) {
       try {
         dispatch({ type: 'CREATE_REQUEST' });
         const { data } = await axios.post(
-          '/api/products',
+          '/api/sliders',
           {},
           {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           }
         );
-        toast.success('product created successfully');
+        console.log('give data', data);
+        toast.success('slider created successfully');
         dispatch({ type: 'CREATE_SUCCESS' });
-        navigate(`/admin/product/${data.product._id}`);
+        navigate(`/admin/sliders/${data.slider._id}`);
       } catch (err) {
         toast.error(getError(error));
         dispatch({
@@ -117,11 +124,11 @@ export default function ProductListScreen() {
     }
   };
 
-  // console.log('in side the prices', products);
+  //   console.log('in side the prices', sliders);
   const deleteHandler = async (product) => {
     if (window.confirm('Are you sure to delete?')) {
       try {
-        await axios.delete(`/api/products/${product._id}`, {
+        await axios.delete(`/api/sliders/${product._id}`, {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
         toast.success('product deleted successfully');
@@ -139,17 +146,16 @@ export default function ProductListScreen() {
     <div>
       <Row>
         <Col>
-          <h1>Products</h1>
+          <h1>Sliders</h1>
         </Col>
         <Col className="col text-end">
           <div>
             <Button type="button" onClick={createHandler}>
-              Create Product
+              Create Slider
             </Button>
           </div>
         </Col>
       </Row>
-
       {loadingCreate && <LoadingBox></LoadingBox>}
       {loadingDelete && <LoadingBox></LoadingBox>}
       {loading ? (
@@ -163,26 +169,24 @@ export default function ProductListScreen() {
               <tr>
                 <th>ID</th>
                 <th>NAME</th>
-                <th>PRICE</th>
                 <th>CATEGORY</th>
                 <th>BRAND</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product._id}>
+              {sliders.map((product) => (
+                <tr>
                   <td>{product._id}</td>
                   <td>{product.name}</td>
-                  <td>{product.price}</td>
-                  {/* <td>{product.productDiscountedPrice}</td> */}
                   <td>{product.category}</td>
+                  {/* <td>{product.productDiscountedPrice}</td> */}
                   <td>{product.brand}</td>
                   <td>
                     <Button
                       type="button"
                       variant="light"
-                      onClick={() => navigate(`/admin/product/${product._id}`)}
+                      onClick={() => navigate(`/admin/sliders/${product._id}`)}
                     >
                       Edit
                     </Button>
@@ -204,7 +208,7 @@ export default function ProductListScreen() {
               <Link
                 className={x + 1 === Number(page) ? 'btn text-bold' : 'btn'}
                 key={x + 1}
-                to={`/admin/products?page=${x + 1}`}
+                to={`/admin/sliders?page=${x + 1}`}
               >
                 {x + 1}
               </Link>

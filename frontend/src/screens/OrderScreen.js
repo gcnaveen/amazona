@@ -106,6 +106,8 @@ export default function OrderScreen() {
     }
   }
 
+  console.log('object', order);
+
   return loading ? (
     <LoadingBox></LoadingBox>
   ) : error ? (
@@ -121,6 +123,7 @@ export default function OrderScreen() {
           <Card className="mb-3">
             <Card.Body>
               <Card.Title>Shipping</Card.Title>
+
               <Card.Text>
                 <strong>Name:</strong> {order.shippingAddress.fullName} <br />
                 <strong>Address: </strong> {order.shippingAddress.address},
@@ -136,6 +139,8 @@ export default function OrderScreen() {
                       Show On Map
                     </a>
                   )}
+                <br />
+                <Link to={`/adress-edit/${order._id}`}>Edit</Link>
               </Card.Text>
               {order.isDelivered ? (
                 <MessageBox variant="success">

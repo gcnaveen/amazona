@@ -7,6 +7,7 @@ import productRouter from './routes/productRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import orderRouter from './routes/orderRoutes.js';
 import uploadRouter from './routes/uploadRoutes.js';
+import sliderRouter from './routes/sliderRouter.js';
 
 dotenv.config();
 mongoose
@@ -28,6 +29,7 @@ app.use('/api/products', productRouter);
 app.use('/api/users', userRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/sliders', sliderRouter);
 app.get('/api/keys/google', (req, res) => {
   res.send({ key: process.env.GOOGLE_API_KEY || '' });
 });

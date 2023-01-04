@@ -74,7 +74,7 @@ export default function SigninScreen() {
         </div>
         <div className="mb-3">
           <Link to={`/reset-password?redirect=${redirect}`}>
-            Forget Password
+            Forgot Password
           </Link>
         </div>
         <div className="mb-3">

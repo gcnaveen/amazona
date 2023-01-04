@@ -10,7 +10,7 @@ function Footer() {
   const year = new Date().getFullYear();
   return (
     <div className="footer">
-      <div className="container">
+      {/* <div className="container">
         <div>
           <Row style={{ background: 'black' }}>
             <Col lg="3">
@@ -154,7 +154,7 @@ function Footer() {
           </Row>
         </div>
       </div>
-      <hr />
+      <hr /> */}
       <div>
         <Row>
           <Col

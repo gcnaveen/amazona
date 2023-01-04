@@ -3,10 +3,10 @@ import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { useContext, useEffect, useState } from 'react';
-import Axios from 'axios';
 import { Store } from '../Store';
 import { toast } from 'react-toastify';
 import { getError } from '../utils';
+import axios from 'axios';
 
 export default function PasswordForm() {
   const navigate = useNavigate();
@@ -21,22 +21,22 @@ export default function PasswordForm() {
   const { search } = useLocation();
   const redirectInUrl = new URLSearchParams(search).get('redirect');
   const redirect = redirectInUrl ? redirectInUrl : '/';
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  const submitHandler = async () => {
+    // e.preventDefault();
     if (password !== cpassword) {
       toast.error('Passwords do not match');
       return;
     }
     console.log(otp, password);
     try {
-      const { data } = await Axios.post('/api/users/change-password', {
+      const { data } = await axios.post('/api/users/change-password', {
         otp,
         password,
       });
+      console.log('data', data);
       ctxDispatch({ type: 'USER_SIGNIN', payload: data });
       localStorage.setItem('userInfo', JSON.stringify(data));
       navigate(redirect || '/');
-      console.log('data', data);
     } catch (err) {
       toast.error(getError(err));
     }
@@ -52,7 +52,7 @@ export default function PasswordForm() {
     <Container className="small-container">
       <Form onSubmit={submitHandler}>
         <Form.Group className="mb-3" controlId="otp">
-          <Form.Label>Otp</Form.Label>
+          <Form.Label>OTP</Form.Label>
           <Form.Control
             type="otp"
             maxLength="4"

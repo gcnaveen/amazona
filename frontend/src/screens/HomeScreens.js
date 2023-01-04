@@ -5,8 +5,14 @@ import Col from 'react-bootstrap/Col';
 import Product from '../components/Product';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
-import Slider from '../components/slider';
+import Slider from '../components/SliderScreens/Slider';
 import { Helmet } from 'react-helmet-async';
+// import { LeftArrow, RightArrow } from '../components/arrows';
+// import { Swiper, SwiperSlide } from 'swiper/react';
+// import { FreeMode } from 'swiper';
+// import 'swiper/css';
+// import 'swiper/css/free-mode';
+// import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -46,16 +52,23 @@ export default function HomeScreens() {
       <Helmet>
         <title>Amazon</title>
       </Helmet>
-      <div className="slider">
+      <div style={{ marginBotton: '20px', width: '650px' }}>
         <Slider />
       </div>
 
-      <div className="products">
+      <div className="products" style={{ paddingTop: '30px' }}>
         {loading ? (
           <LoadingBox />
         ) : error ? (
           <MessageBox variant="danger">{error}</MessageBox>
         ) : (
+          // <ScrollMenu
+          //   // Header={<div>HEADER</div>}
+          //   // Footer={<div>FOOTER</div>}
+          //   LeftArrow={LeftArrow}
+          //   RightArrow={RightArrow}
+          //   // onWheel={onWheel}
+          // >
           <Row>
             {products.map((product) => {
               return (
@@ -68,10 +81,15 @@ export default function HomeScreens() {
                   style={{ paddingBottom: '10px' }}
                 >
                   <Product product={product} />
+
+                  {/* <HorizontalScroll> */}
+
+                  {/* </HorizontalScroll> */}
                 </Col>
               );
             })}
           </Row>
+          // </ScrollMenu>
         )}
       </div>
     </div>

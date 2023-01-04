@@ -86,7 +86,7 @@ export default function ProfileScreen() {
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="password">
-          <Form.Label>Password</Form.Label>
+          <Form.Label>New Password</Form.Label>
           <Form.Control
             type="password"
             onChange={(e) => setPassword(e.target.value)}

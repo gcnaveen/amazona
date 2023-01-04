@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import { getError } from '../utils';
 import LoadingBox from '../components/LoadingBox';
 import { Helmet } from 'react-helmet-async';
+import swal from 'sweetalert';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -33,7 +34,7 @@ export default function PlaceOrderScreen() {
   });
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
-  console.log('cart', state);
+  // console.log('cart', state);
   const round2 = (num) => Math.round(num * 100 + Number.EPSILON) / 100; // 123.2345 => 123.23
   cart.itemsPrice = round2(
     cart.cartItems.reduce((a, c) => a + c.quantity * c.price, 0)
@@ -52,7 +53,6 @@ export default function PlaceOrderScreen() {
   const placeOrderHandler = async () => {
     try {
       dispatch({ type: 'CREATE_REQUEST' });
-
       const { data } = await Axios.post(
         '/api/orders',
         {
@@ -70,10 +70,19 @@ export default function PlaceOrderScreen() {
           },
         }
       );
+      console.log(data);
       ctxDispatch({ type: 'CART_CLEAR' });
       dispatch({ type: 'CREATE_SUCCESS' });
       localStorage.removeItem('cartItems');
-      navigate(`/order/${data.order._id}`);
+      swal({
+        title: 'Success',
+        text: ` ${data.order.orderItems.map(
+          (ele) => ele.name
+        )} item order has been placed`,
+        icon: 'success',
+        button: 'close',
+      });
+      // navigate(`/order/${data.order._id}`);
     } catch (err) {
       dispatch({ type: 'CREATE_FAIL' });
       toast.error(getError(err));

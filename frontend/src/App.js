@@ -36,6 +36,13 @@ import UserEditScreen from './screens/UserEditScreen';
 import MapScreen from './screens/MapScreen';
 import ForgetPasswordScreen from './screens/ForgetPasswordScreen';
 import Footer from './components/Footer';
+import SlidingProducts from './components/SliderScreens/SlidingProducts';
+import SlideProductScreen from './components/SliderScreens/SlideProductScreen';
+import SliderCartScreen from './components/SliderScreens/SliderCartScreen';
+import SlideListScreen from './components/SliderScreens/SlideListScreen';
+import SliderEditScreen from './components/SliderScreens/SliderEditScreen';
+import EditShippingAdress from './screens/EditShippingAdress';
+// import swal from 'sweetalert';
 
 function App() {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -62,7 +69,20 @@ function App() {
     fetchCategories();
   }, []);
 
-  console.log('user', userInfo);
+  console.log('user', state);
+
+  // const brandHandler = (userInfo) => {
+  //   if (userInfo && userInfo?.length) {
+  //     let list = [];
+  //     listItems?.forEach((item, index) => {
+  //       if (item?.brand?.toLowerCase() === brand?.toLowerCase()) {
+  //         list.push(item);
+  //       }
+  //     });
+  //     setUpdatedList(list);
+  //   }
+  // };
+  console.log('userInfo', userInfo);
 
   return (
     <BrowserRouter>
@@ -89,21 +109,36 @@ function App() {
               </Button>
 
               <LinkContainer to="/">
-                <Navbar.Brand>amazona</Navbar.Brand>
+                <Navbar.Brand>
+                  {/* <img
+                    src="https://www.betonamit.com/wp-content/uploads/2020/09/amazon-logo-header-300x188.jpg"
+                    alt=""
+                    style={{ width: 'auto', height: '40px' }}
+                  /> */}
+                  amazona
+                </Navbar.Brand>
               </LinkContainer>
+
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                 <SearchBox />
+
                 <Nav className="me-auto  w-100  justify-content-end">
-                  {userInfo && userInfo.isAdmin ? null : (
+                  {userInfo && userInfo.isAdmin ? null : userInfo === null ? (
+                    <Link to="/signin" className="nav-link">
+                      <i className="fas fa-shopping-cart"></i>
+                      Cart
+                    </Link>
+                  ) : (
                     <Link to="/cart" className="nav-link">
                       <i className="fas fa-shopping-cart"></i>
                       Cart
-                      {cart.cartItems.length > 0 && (
-                        <Badge pill bg="danger">
-                          {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
-                        </Badge>
-                      )}
+                      {cart.cartItems.length > 0 &&
+                        (userInfo ? (
+                          <Badge pill bg="danger">
+                            {cart.cartItems.reduce((a, c) => a + c.quantity, 0)}
+                          </Badge>
+                        ) : null)}
                     </Link>
                   )}
 
@@ -114,6 +149,9 @@ function App() {
                       </LinkContainer>
                       <LinkContainer to="/admin/products">
                         <NavDropdown.Item>Products</NavDropdown.Item>
+                      </LinkContainer>
+                      <LinkContainer to="/admin/sliders">
+                        <NavDropdown.Item>Slides</NavDropdown.Item>
                       </LinkContainer>
                       <LinkContainer to="/admin/orders">
                         <NavDropdown.Item>Orders</NavDropdown.Item>
@@ -245,6 +283,10 @@ function App() {
                   </ProtectedRoute>
                 }
               ></Route>{' '}
+              <Route
+                path="/adress-edit/:id"
+                element={<EditShippingAdress />}
+              ></Route>
               <Route path="/search" element={<SearchScreen />} />
               <Route
                 path="/orderhistory"
@@ -266,6 +308,33 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* slide Route */}
+              <Route
+                path="/slider"
+                element={
+                  <ProtectedRoute>
+                    <SlidingProducts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/carts" element={<SliderCartScreen />} />
+              <Route path="/sliders/:slug" element={<SlideProductScreen />} />
+              <Route
+                path="/admin/sliders"
+                element={
+                  <AdminRoute>
+                    <SlideListScreen />
+                  </AdminRoute>
+                }
+              ></Route>
+              <Route
+                path="/admin/sliders/:id"
+                element={
+                  <AdminRoute>
+                    <SliderEditScreen />
+                  </AdminRoute>
+                }
+              ></Route>
               {/* Admin Routes */}
               <Route
                 path="/admin/dashboard"

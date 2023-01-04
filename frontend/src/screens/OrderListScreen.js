@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import OrderSort from '../components/OrderSort';
 import { Store } from '../Store';
 import { getError } from '../utils';
 
@@ -19,6 +20,7 @@ const reducer = (state, action) => {
       return {
         ...state,
         orders: action.payload,
+        // filter_orders: [...action.payload],
         loading: false,
       };
     case 'FETCH_FAIL':
@@ -35,6 +37,7 @@ const reducer = (state, action) => {
       return { ...state, loadingDelete: false };
     case 'DELETE_RESET':
       return { ...state, loadingDelete: false, successDelete: false };
+
     default:
       return state;
   }
@@ -42,9 +45,17 @@ const reducer = (state, action) => {
 export default function OrderListScreen() {
   // const { search } = useLocation();
   // const sp = new URLSearchParams(search); // /search?category=Shirts
+  // const category = sp.get('category') || 'all';
+  // const query = sp.get('query') || 'all';
+  // const price = sp.get('price') || 'all';
+  // const order = sp.get('order') || 'newest';
+  // const page = sp.get('page') || 1;
+  // const { search } = useLocation();
+  // const sp = new URLSearchParams(search); // /search?category=Shirts
   // const users = sp.get('users') || 'all';
   // const products = sp.get('products') || 'all';
-  const [select, setSelect] = useState('');
+  const [data, setData] = useState([]);
+  const [sort, setSort] = useState('highest');
   const navigate = useNavigate();
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -53,7 +64,7 @@ export default function OrderListScreen() {
       loading: true,
       error: '',
     });
-  console.log(orders);
+  console.log('orders', orders);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -75,12 +86,6 @@ export default function OrderListScreen() {
       fetchData();
     }
   }, [userInfo, successDelete]);
-  // const getFilterUrl = (filter) => {
-  //   const filterUsers = filter.users || users;
-  //   const filterProducts = filter.products || products;
-
-  //   return `/search?category=${filterUsers}&query=${filterProducts}`;
-  // };
   const deleteHandler = async (order) => {
     if (window.confirm('Are you sure to delete?')) {
       try {
@@ -98,30 +103,50 @@ export default function OrderListScreen() {
       }
     }
   };
-  // orders.map((ele) => {
-  //   return console.log(
-  //     'ele',
-  //     ele.orderItems.map((a) => a.image)
-  //   );
-  // });
+  useEffect(() => {
+    const sortArray = () => {
+      if (sort === 'highest') {
+        const sorted = orders?.sort(function (a, b) {
+          if (a.totalPrice > b.totalPrice) return 1;
+          if (b.totalPrice > a.totalPrice) return -1;
+          return 0;
+        });
+        setData(sorted);
+        console.log(sort);
+      } else if (sort === 'lowest') {
+        const sorted = orders?.sort(function (a, b) {
+          if (b.totalPrice > a.totalPrice) return 1;
+          if (a.totalPrice > b.totalPrice) return -1;
+          return 0;
+        });
+        setData(sorted);
+        console.log(sort);
+      }
+    };
+
+    sortArray(sort);
+  }, [orders, sort]);
+
+  // console.log('data', data);
   return (
     <div>
       <Helmet>
         <title>Orders</title>
       </Helmet>
       <h1>Orders</h1>
-      <Row>
-        <Col className="text-end">
-          Sort by{' '}
-          <select value={select} onChange={(e) => setSelect(e.target.value)}>
-            <option></option>
-            <option value="newest">Newest Arrivals</option>
-            <option value="lowest">Price: Low to High</option>
-            <option value="highest">Price: High to Low</option>
+      <div>
+        <form action="#">
+          <label htmlFor="sort"></label>
+          <select
+            onChange={(e) => setSort(e.target.value)}
+            // onClick={sorting}
+          >
+            <option value="lowest">Price: low to high</option>
+            <option value="#" disabled></option>
+            <option value="highest"> Price: high to low</option>
           </select>
-        </Col>
-      </Row>
-
+        </form>
+      </div>
       {loadingDelete && <LoadingBox></LoadingBox>}
       {loading ? (
         <LoadingBox></LoadingBox>
@@ -142,7 +167,7 @@ export default function OrderListScreen() {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+            {data?.map((order) => (
               <tr key={order._id}>
                 <td>
                   <img

@@ -33,7 +33,7 @@ export default function Product(props) {
   );
   // console.log('in side product', state.userInfo?.isAdmin);
   return (
-    <Card>
+    <Card style={{ background: '#f8f9fa' }}>
       <Link to={`/product/${props.product.slug}`}>
         <img
           src={props.product.image}
@@ -57,7 +57,16 @@ export default function Product(props) {
               {' '}
               Rs.{props.product.price}
             </div>
-            <div style={{ margin: 'auto' }}>({percentage}% off)</div>
+
+            <div
+              style={{
+                margin: 'auto',
+                background: '#dc3545',
+                color: 'white',
+              }}
+            >
+              ({percentage}% off)
+            </div>
           </div>
         </Card.Text>
         {props.product.countInStock === 0 ? (

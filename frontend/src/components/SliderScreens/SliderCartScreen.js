@@ -1,16 +1,16 @@
 import { useContext } from 'react';
-import { Store } from '../Store';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import MessageBox from '../components/MessageBox';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Helmet } from 'react-helmet-async';
+import { Store } from '../../Store';
+import MessageBox from '../MessageBox';
 
-export default function CartScreen() {
+export default function SliderCartScreen() {
   const navigate = useNavigate();
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const {
@@ -18,7 +18,8 @@ export default function CartScreen() {
   } = state;
 
   const updateCartHandler = async (item, quantity) => {
-    const { data } = await axios.get(`/api/products/${item._id}`);
+    console.log('in side handler', item);
+    const { data } = await axios.get(`/api/sliders/${item._id}`);
     if (data.countInStock < quantity) {
       window.alert('Sorry. Product is out of stock');
       return;
@@ -35,8 +36,7 @@ export default function CartScreen() {
   const checkoutHandler = () => {
     navigate('/signin?redirect=/shipping');
   };
-
-  console.log(state);
+  console.log('in side slide cart');
 
   return (
     <div>

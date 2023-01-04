@@ -85,7 +85,7 @@ export default function UserListScreen() {
       }
     }
   };
-
+  console.log(state);
   return (
     <div>
       <Helmet>
@@ -109,6 +109,7 @@ export default function UserListScreen() {
             </tr>
           </thead>
           <tbody>
+            {/* {state.userInfo._id === } */}
             {users.map((user) => (
               <tr key={user._id}>
                 <td>{user._id}</td>
