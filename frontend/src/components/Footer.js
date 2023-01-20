@@ -201,7 +201,7 @@ function Footer() {
           <Col>
             <p className="footer__copyright" style={{ color: 'white' }}>
               {' '}
-              Copyright {year} developed by Amazon . All rights reserved.
+              Copyright {year} developed by MedsShop . All rights reserved.
             </p>
           </Col>
         </Row>

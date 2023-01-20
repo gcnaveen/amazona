@@ -1,4 +1,10 @@
-import { BrowserRouter, Link, Route, Routes, useNavigation } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Link,
+  Route,
+  Routes,
+  useNavigation,
+} from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomeScreen from './screens/HomeScreens';
@@ -52,7 +58,7 @@ import CreateCateogry from './screens/CreateCateogry';
 // import swal from 'sweetalert';
 
 function App() {
-  const { state, dispatch: ctxDispatch,getInitialValues } = useContext(Store);
+  const { state, dispatch: ctxDispatch, getInitialValues } = useContext(Store);
   const { fullBox, cart, userInfo } = state;
   const signoutHandler = () => {
     ctxDispatch({ type: 'USER_SIGNOUT' });
@@ -78,11 +84,6 @@ function App() {
     fetchCategories();
   }, [state]);
 
-  
-
-
-
-
   // console.log('user', state);
 
   // const brandHandler = (userInfo) => {
@@ -97,10 +98,6 @@ function App() {
   //   }
   // };
   // console.log('userInfo', userInfo);
-
-
-
-
 
   return (
     <BrowserRouter>
@@ -117,7 +114,11 @@ function App() {
       >
         <ToastContainer position="bottom-center" limit={1} />
         <header>
-          <Navbar  variant="dark"  style={{backgroundColor:'#221b68'}} expand="lg">
+          <Navbar
+            variant="dark"
+            style={{ backgroundColor: '#221b68' }}
+            expand="lg"
+          >
             <Container>
               <Button
                 variant="dark"
@@ -127,13 +128,13 @@ function App() {
               </Button>
 
               <LinkContainer to="/">
-                <Navbar.Brand  style={{color:'white'}} > 
+                <Navbar.Brand style={{ color: 'white' }}>
                   {/* <img
                     src="https://www.betonamit.com/wp-content/uploads/2020/09/amazon-logo-header-300x188.jpg"
                     alt=""
                     style={{ width: 'auto', height: '40px' }}
                   /> */}
-                  amazona
+                  MedsShop
                 </Navbar.Brand>
               </LinkContainer>
 
@@ -144,12 +145,22 @@ function App() {
                 <Nav className="me-auto  w-100  justify-content-end">
                   {userInfo && userInfo.isAdmin ? null : userInfo === null ? (
                     <Link to="/signin" className="nav-link">
-                      <i className="fas fa-shopping-cart" style={{color:'white'}}></i>
+                      <i
+                        className="fas fa-shopping-cart"
+                        style={{ color: 'white' }}
+                      ></i>
                       Cart
                     </Link>
                   ) : (
-                    <Link to="/cart" className="nav-link" style={{color:'white'}}>
-                      <i className="fas fa-shopping-cart" style={{color:'white'}}></i>
+                    <Link
+                      to="/cart"
+                      className="nav-link"
+                      style={{ color: 'white' }}
+                    >
+                      <i
+                        className="fas fa-shopping-cart"
+                        style={{ color: 'white' }}
+                      ></i>
                       Cart
                       {cart.cartItems.length > 0 &&
                         (userInfo ? (
@@ -191,7 +202,8 @@ function App() {
                     </NavDropdown>
                   ) : userInfo ? (
                     <div>
-                      <NavDropdown style={{color:'white'}}
+                      <NavDropdown
+                        style={{ color: 'white' }}
                         title={userInfo.name}
                         id="basic-nav-dropdown"
                       >
@@ -225,22 +237,33 @@ function App() {
           </Navbar>
         </header>
         <div className="catagory-div">
-              {/* // <NavItem key={i}>{ category}</NavItem> */}
+          {/* // <NavItem key={i}>{ category}</NavItem> */}
 
-          {categories.map((category,i) => (
-
-
-            
-            <Nav.Item className='category-main-container' key={category.slug}>
-                <NavLink to={`/products/categories?type=category&name=${category.slug}`} style={{textDecoration:'none',color:'#363075',fontSize:'18px'}} >
+          {categories.map((category, i) => (
+            <Nav.Item className="category-main-container" key={category.slug}>
+              <NavLink
+                to={`/products/categories?type=category&name=${category.slug}`}
+                style={{
+                  textDecoration: 'none',
+                  color: '#363075',
+                  fontSize: '18px',
+                }}
+              >
                 {category.name}
-                </NavLink>
-              <div className='sub-category-div'>
-              {category?.subCategory &&
-                category.subCategory.map((item, i) => (
-                 <NavLink  key={i} to={`/products/categories?type=subCategory&name=${item.slug}`}   className='sub-menu-item' style={{textDecoration:'none',color:'white',}}>{item.name}</NavLink>
-                 ))}
-                 </div>
+              </NavLink>
+              <div className="sub-category-div">
+                {category?.subCategory &&
+                  category.subCategory.map((item, i) => (
+                    <NavLink
+                      key={i}
+                      to={`/products/categories?type=subCategory&name=${item.slug}`}
+                      className="sub-menu-item"
+                      style={{ textDecoration: 'none', color: 'white' }}
+                    >
+                      {item.name}
+                    </NavLink>
+                  ))}
+              </div>
             </Nav.Item>
           ))}
         </div>
@@ -268,20 +291,21 @@ function App() {
             <Nav.Item>
               <strong>Categories</strong>
             </Nav.Item>
-            <div className='side-bar-nav'>
-            {categories.map((category,i) => (
-
-                  // <NavItem key={i}>{ category}</NavItem>
-           <SubMenuComp   key={category.slug} category={category} />
-            ))}
-              </div>
+            <div className="side-bar-nav">
+              {categories.map((category, i) => (
+                // <NavItem key={i}>{ category}</NavItem>
+                <SubMenuComp key={category.slug} category={category} />
+              ))}
+            </div>
           </Nav>
         </div>
-        <main  style={{overflowX:'hidden'}}>
-          <Container className="mt-3"  style={{overflowX:'hidden'}}>
-            
+        <main style={{ overflowX: 'hidden' }}>
+          <Container className="mt-3" style={{ overflowX: 'hidden' }}>
             <Routes>
-              <Route path="/products/categories" element={<CategoryWiseProductList />} />
+              <Route
+                path="/products/categories"
+                element={<CategoryWiseProductList />}
+              />
               <Route path="/product/:slug" element={<ProductScreen />} />
               <Route path="/cart" element={<CartScreen />} />
               <Route path="/signin" element={<SigninScreen />} />
@@ -385,7 +409,7 @@ function App() {
                 }
               ></Route>
               <Route
-                path='/admin/createCategory'
+                path="/admin/createCategory"
                 element={
                   <AdminRoute>
                     <CreateCateogry />
