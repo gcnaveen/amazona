@@ -60,14 +60,56 @@ export default function ShippingAddressScreen() {
   const {
     fullBox,
     userInfo,
-    cart: { shippingAddress },
+    // cart: { shippingAddress },
   } = state;
-  const [fullName, setFullName] = useState(shippingAddress.fullName || '');
-  const [address, setAddress] = useState(shippingAddress.address || '');
-  const [city, setCity] = useState(shippingAddress.city || '');
-  const [postalCode, setPostalCode] = useState(
-    shippingAddress.postalCode || ''
-  );
+  // const [fullName, setFullName] = useState(shippingAddress.fullName || '');
+  // const [address, setAddress] = useState(shippingAddress.address || '');
+  // const [city, setCity] = useState(shippingAddress.city || '');
+  // const [postalCode, setPostalCode] = useState(
+  //   shippingAddress.postalCode || ''
+  // );
+
+
+const [shippingAddress,setShippingAddress]=useState({})
+
+
+  useEffect(() => {
+
+    async function getShippingAddress() {
+      let address=await axios.get(`/api/orders/order/${id}`,{}, {
+          headers: { authorization: `Bearer ${userInfo.token}` },
+        })
+      console.log("address", address.data.shippingAddress.location)
+     setShippingAdress1({...address.data.shippingAddress})
+    }
+    getShippingAddress()
+  
+},[])
+
+
+
+
+
+
+  console.log(shippingAddress)
+
+  const [shippingAdress1, setShippingAdress1] = useState({
+    fullName: shippingAddress.fullBox, address: shippingAddress.address, city: shippingAddress.city, postalCode: shippingAddress.postalCode,
+    country: shippingAddress.country, location: { lat: shippingAddress?.location?.lat, lng: shippingAddress?.location?.lng }
+  })
+
+
+
+  function handleShippingAdress(e) {
+  let  {value,name}=e.target
+    setShippingAdress1({ ...shippingAdress1, [name]: value })
+    
+    
+  }
+  console.log("new",shippingAdress1)
+  console.log(shippingAddress)
+
+
   //   useEffect(() => {
   //     if (!userInfo) {
   //       navigate('/signin?redirect=/shipping');
@@ -111,13 +153,8 @@ export default function ShippingAddressScreen() {
     try {
       dispatch({ type: 'DELIVER_REQUEST' });
       const { data } = await axios.put(
-        `/api/orders/${order._id}/address`,
-        {
-          address,
-          city,
-          country,
-          postalCode,
-        },
+        `/api/orders/${id}/address`,
+        shippingAdress1,
         {
           headers: { authorization: `Bearer ${userInfo.token}` },
         }
@@ -125,7 +162,7 @@ export default function ShippingAddressScreen() {
       console.log(data);
       dispatch({ type: 'DELIVER_SUCCESS', payload: data });
       toast.success('Order is delivered');
-      navigate(`/order/${order._id}`);
+      navigate(`/order/${id}`);
     } catch (err) {
       toast.error(getError(err));
       dispatch({ type: 'DELIVER_FAIL' });
@@ -144,7 +181,9 @@ export default function ShippingAddressScreen() {
           <Form.Group className="mb-3" controlId="fullName">
             <Form.Label>Full Name</Form.Label>
             <Form.Control
-              value={fullName}
+              name='fullName'
+              value={shippingAdress1.fullName}
+              onChange={handleShippingAdress}
               //   onChange={(e) => setFullName(e.target.value)}
               required
             />
@@ -152,7 +191,9 @@ export default function ShippingAddressScreen() {
           <Form.Group className="mb-3" controlId="address">
             <Form.Label>Address</Form.Label>
             <Form.Control
-              value={address}
+            name='address'
+              value={shippingAdress1.address}
+              onChange={handleShippingAdress}
               //   onChange={(e) => setAddress(e.target.value)}
               required
             />
@@ -160,7 +201,9 @@ export default function ShippingAddressScreen() {
           <Form.Group className="mb-3" controlId="city">
             <Form.Label>City</Form.Label>
             <Form.Control
-              value={city}
+              name='city'
+              value={shippingAdress1.city}
+              onChange={handleShippingAdress}
               //   onChange={(e) => setCity(e.target.value)}
               required
             />
@@ -168,7 +211,9 @@ export default function ShippingAddressScreen() {
           <Form.Group className="mb-3" controlId="postalCode">
             <Form.Label>Postal Code</Form.Label>
             <Form.Control
-              value={postalCode}
+              name='postalCode'
+              value={shippingAdress1.postalCode}
+              onChange={handleShippingAdress}
               //   onChange={(e) => setPostalCode(e.target.value)}
               required
             />
@@ -176,7 +221,9 @@ export default function ShippingAddressScreen() {
           <Form.Group className="mb-3" controlId="country">
             <Form.Label>Country</Form.Label>
             <Form.Control
-              value={country}
+              name='country'
+              value={shippingAdress1.country}
+              onChange={handleShippingAdress}
               //   onChange={(e) => setCountry(e.target.value)}
               required
             />
@@ -190,10 +237,12 @@ export default function ShippingAddressScreen() {
             >
               Choose Location On Map
             </Button>
-            {shippingAddress.location && shippingAddress.location.lat ? (
+            {console.log("location is",shippingAdress1.location)}
+
+            {shippingAdress1.location && shippingAdress1.location.lat ? (
               <div>
-                LAT: {shippingAddress.location.lat}
-                LNG:{shippingAddress.location.lng}
+                LAT: {shippingAdress1.location.lat}
+                LNG:{shippingAdress1.location.lng}
               </div>
             ) : (
               <div>No location</div>

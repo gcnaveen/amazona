@@ -8,6 +8,7 @@ body {
 }
 .site-container {
   min-height: 100vh;
+  overflow-x: hidden !important;
 }
 main {
   flex: 1;
@@ -37,6 +38,8 @@ main {
   padding: 1rem;
 }
 .img-large {
+  height: 636px;
+  width: 522px;
   max-width: 100%;
 }
 .imp-thumbnail {
@@ -74,7 +77,7 @@ button.thumbnail {
 .footer {
   padding-top: 60px;
   padding-bottom: 30px;
-  background: black;
+  background: #ff184a;
 }
 .footer__text {
   line-height: 30px;
@@ -98,14 +101,112 @@ button.thumbnail {
 }
 .catagory-div {
   display: flex;
+  flex-wrap: wrap;
+  gap:20px;
+  cursor: pointer;
   text-align: center;
   padding-left: 160px;
   padding-top: 5px;
   font-size: 15px;
-  color: white;
-  background: rgb(37 50 50);
+  background-color:white;
   height: 37px;
+      width: 100vw;
 }
+
+
+button{
+  color: white !important;
+  background-color: #ff184a !important;
+}
+
+@media only screen and (max-width: 500px){
+  .catagory-div{
+    display: none !important;
+  }
+}
+
+.side-bar-nav{
+    display: flex;
+    margin-top: 30px;
+    cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  padding: 10px;
+  gap: 16px;
+    position: fixed;
+
+}
+
+.side-bar-sub-category-div{
+  display:flex;
+  flex-direction:column;
+  padding: 0px 10px 10px 10px;
+  cursor: pointer;
+  text-decoration: none;
+
+}
+
+.toggle-btn{
+  width: 15px;
+    height: 24px;
+    text-align: center;
+    padding: 0px;
+
+}
+.sub-menu-item{
+  margin: 4px;
+  padding: 4px;
+}
+
+.sub-menu-item:hover{
+background-color: #697272;
+    
+
+}
+.list-img-size{
+  width: 100%;
+  height: 300px;
+}
+
+.action-icons-container{
+  display: flex;
+    align-items: end;
+    padding-bottom: 10px;
+    gap: 12px;
+}
+
+.sub-category-div{
+  display: none;
+  position: relative;
+  top: 0;
+z-index: 1000;
+    cursor: pointer;
+    margin: 6px;
+    color: white;
+  background-color:#363075;
+
+    border-radius: 4px;
+}
+
+#admin-nav-dropdown{
+  color: white !important;
+}
+
+
+.category-main-container:hover .sub-category-div{
+ display: flex;
+ position: relative;
+ top: -2px;
+ z-index: 1000;
+    flex-direction: column;
+    cursor: pointer;
+    margin: 6px;
+     background-color:#363075;
+
+    border-radius: 4px;
+}
+
 /* sidebar */
 .navbar-brand {
   font-weight: bold;
@@ -115,8 +216,10 @@ button.thumbnail {
   height: 100%;
   position: absolute;
   left: -300px;
-  background-color: #100901;
+  background-color: #363075;
   transition: 0.5s;
+  height: 100vh;
+    position: fixed;
 }
 
 .site-container {
@@ -200,4 +303,39 @@ button.thumbnail {
 }
 .hero__content {
   padding-top: 45px;
+}
+
+
+
+.delivery-status-btn-container{
+      display: flex;
+  flex-direction: column;
+  
+}
+.delivery-status-read-btn{
+  margin-top: 5px;
+      display: flex;
+  flex-direction: row-reverse;
+justify-content: start;
+  gap:5px
+}
+.delivery-status-btn{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: start;
+  gap: 6px;
+}
+
+.action-container{
+  display: flex;
+  position:relative;
+  z-index: 2000;
+}
+
+.read-container{
+  background-color: aqua !important;
+  margin-top: 5px;
+    position:relative;
+  z-index: 500;
+
 }

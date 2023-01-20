@@ -27,7 +27,8 @@ export default function ProfileScreen() {
   const [name, setName] = useState(userInfo.name);
   const [email, setEmail] = useState(userInfo.email);
   const [password, setPassword] = useState('');
-  const [, setConfirmPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
 
   const [, dispatch] = useReducer(reducer, {
     loadingUpdate: false,
@@ -35,6 +36,11 @@ export default function ProfileScreen() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match")
+      return
+    }
     try {
       const { data } = await axios.put(
         '/api/users/profile',
@@ -42,6 +48,7 @@ export default function ProfileScreen() {
           name,
           email,
           password,
+          oldPassword
         },
         {
           headers: { Authorization: `Bearer ${userInfo.token}` },
@@ -83,6 +90,13 @@ export default function ProfileScreen() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="password">
+          <Form.Label>Current Password</Form.Label>
+          <Form.Control
+            type="password"
+            onChange={(e) => setOldPassword(e.target.value)}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="password">

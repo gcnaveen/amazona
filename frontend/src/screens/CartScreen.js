@@ -36,7 +36,6 @@ export default function CartScreen() {
     navigate('/signin?redirect=/shipping');
   };
 
-  console.log(state);
 
   return (
     <div>

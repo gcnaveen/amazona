@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import axios from 'axios';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -7,6 +7,7 @@ import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
 import Slider from '../components/SliderScreens/Slider';
 import { Helmet } from 'react-helmet-async';
+import { Store } from '../Store';
 // import { LeftArrow, RightArrow } from '../components/arrows';
 // import { Swiper, SwiperSlide } from 'swiper/react';
 // import { FreeMode } from 'swiper';
@@ -28,12 +29,34 @@ const reducer = (state, action) => {
 };
 
 export default function HomeScreens() {
+  const { getInitialValues,state, dispatch: ctxDispatch  } = useContext(Store);
+
   const [{ loading, error, products }, dispatch] = useReducer(reducer, {
     products: [],
     loading: true,
     error: '',
   });
 
+
+  useEffect(() => {
+  },[])
+  
+  
+  
+  useEffect(() => {
+    let items=localStorage.getItem('userInfo') && localStorage.getItem(`${JSON.parse(localStorage.getItem('userInfo'))._id}`) 
+      ? JSON.parse(localStorage.getItem(`${JSON.parse(localStorage.getItem('userInfo'))._id}`))
+      : []
+      
+    ctxDispatch({
+      type: 'INITIAL_STATE',
+      payload: { items },
+    });
+  
+},[])
+
+  
+  
   useEffect(() => {
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
@@ -46,13 +69,13 @@ export default function HomeScreens() {
     };
     fetchData();
   }, []);
-  console.log('pro', products);
+  // console.log('pro', products);
   return (
-    <div>
+    <div style={{overflowX:'hidden'}}>
       <Helmet>
         <title>Amazon</title>
       </Helmet>
-      <div style={{ marginBotton: '20px', width: '650px' }}>
+      <div style={{ marginBotton: '20px', width: '100%' }}>
         <Slider />
       </div>
 
@@ -69,7 +92,7 @@ export default function HomeScreens() {
           //   RightArrow={RightArrow}
           //   // onWheel={onWheel}
           // >
-          <Row>
+          <Row  className='justify-content-evenly' >
             {products.map((product) => {
               return (
                 <Col

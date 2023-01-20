@@ -12,140 +12,126 @@ import { getError } from '../../utils';
 import LoadingBox from '../LoadingBox';
 import MessageBox from '../MessageBox';
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'FETCH_REQUEST':
-      return { ...state, loading: true };
-    case 'FETCH_SUCCESS':
-      return { ...state, loading: false };
-    case 'FETCH_FAIL':
-      return { ...state, loading: false, error: action.payload };
-    case 'UPDATE_REQUEST':
-      return { ...state, loadingUpdate: true };
-    case 'UPDATE_SUCCESS':
-      return { ...state, loadingUpdate: false };
-    case 'UPDATE_FAIL':
-      return { ...state, loadingUpdate: false };
-    case 'UPLOAD_REQUEST':
-      return { ...state, loadingUpload: true, errorUpload: '' };
-    case 'UPLOAD_SUCCESS':
-      return {
-        ...state,
-        loadingUpload: false,
-        errorUpload: '',
-      };
-    case 'UPLOAD_FAIL':
-      return { ...state, loadingUpload: false, errorUpload: action.payload };
-    default:
-      return state;
-  }
-};
 export default function ProductEditScreen() {
+    const { state, dispatch: ctxDispatch } = useContext(Store);
+  const {
+    userInfo,
+    // cart: { shippingAddress },
+  } = state;
   const navigate = useNavigate();
   const params = useParams(); // /product/:id
   const { id: productId } = params;
   console.log(productId);
-  const { state } = useContext(Store);
-  const { userInfo } = state;
-  const [{ loading, error, loadingUpdate, loadingUpload }, dispatch] =
-    useReducer(reducer, {
-      loading: true,
-      error: '',
-    });
+ 
 
-  const [name, setName] = useState('');
-  //   const [slug, setSlug] = useState('');
-  //   const [price, setPrice] = useState('');
-  const [image, setImage] = useState('');
-  const [subCategory, setSubCategory] = useState([]);
-  const [category, setCategory] = useState('');
-  //   const [countInStock, setCountInStock] = useState('');
-  const [brand, setBrand] = useState('');
-  const [description, setDescription] = useState('');
-  //   const [productDiscountedPrice, setProductDiscountedPrice] = useState('');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCategories = async () => {
       try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/sliders/${productId}`);
-        console.log('data', data);
-        setName(data.name);
-        // setSlug(data.slug);
-        // setPrice(data.price);
-        setImage(data.image);
-        setSubCategory(data.subCategory);
-        setCategory(data.category);
-        // setCountInStock(data.countInStock);
-        setBrand(data.brand);
-        setDescription(data.description);
-        // setProductDiscountedPrice(data.productDiscountedPrice);
-        dispatch({ type: 'FETCH_SUCCESS' });
+        const { data } = await axios.get(`/api/products/getAllCats`);
+        console.log(data)
+        setCategories(data);
       } catch (err) {
-        dispatch({
-          type: 'FETCH_FAIL',
-          payload: getError(err),
-        });
+        console.log(err)
       }
     };
-    fetchData();
-  }, [productId]);
+    fetchCategories();
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      dispatch({ type: 'UPDATE_REQUEST' });
-      await axios.put(
-        `/api/sliders/${productId}`,
-        {
-          _id: productId,
-          name,
-          image,
-          subCategory,
-          category,
-          brand,
-          description,
-        },
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
-      );
-      dispatch({
-        type: 'UPDATE_SUCCESS',
-      });
-      toast.success('Product updated successfully');
-      navigate('/admin/sliders');
-    } catch (err) {
-      toast.error(getError(err));
-      dispatch({ type: 'UPDATE_FAIL' });
+
+  
+  }, []);
+  
+
+
+
+
+ const uploadFileHandler=(e) => {
+     console.log(e.target.files)   
+     setSliderFiles(e.target.files)
     }
-  };
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
-    try {
-      dispatch({ type: 'UPLOAD_REQUEST' });
-      const { data } = await axios.post('/api/upload', bodyFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          authorization: `Bearer ${userInfo.token}`,
-        },
-      });
-      dispatch({ type: 'UPLOAD_SUCCESS' });
+  useEffect(() => {
 
-      //   if (forImages) {
-      //     setImages([...images, data.secure_url]);
-      //   } else {
-      setImage(data.secure_url);
-      //   }
-      toast.success('Image uploaded successfully. click Update to apply it');
-    } catch (err) {
-      toast.error(getError(err));
-      dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
+    const fetchDetails = async () => {
+        const { data } = await axios.get(`/api/sliders/${productId}`,{}, {
+          headers: { authorization: `Bearer ${userInfo.token}`},
+        });
+      setSliderFields({...data})
+  }
+  fetchDetails()
+},[])
+
+
+
+
+  const [sliderFields,setSliderFields]=useState({name:'',brand:'',category:'',subCategory:'',description:'',productID:'',sliderType:''})
+  const [sliderFiles, setSliderFiles] = useState([])
+    const [categories, setCategories] = useState([]);
+    const [subCategories, setSubCategories] = useState([]);
+
+  useEffect(() => {
+    if (sliderFields.category) {
+    let selectedCategory=categories.find((category)=>{
+  return category.slug===sliderFields.category
+})
+      setSubCategories(selectedCategory.subCategory)
     }
-  };
+},[sliderFields.category])
+
+   
+  const handleSlideFields = (e) => {
+    let { name, value } = e.target
+    if (name === 'category') { 
+let selectedCategory=categories.find((category)=>{
+  return category.slug===value
+})
+      setSubCategories(selectedCategory.subCategory)
+      }
+
+        setSliderFields({...sliderFields,[name]:value})
+
+    
+    }
+
+    const submitUpdateForm =  async  (e) => {
+      e.preventDefault()
+
+const formData=new FormData()
+
+
+      for (let i = 0; i < sliderFiles.length; i++){
+formData.append('file',sliderFiles[i])
+
+      }   
+      console.log(sliderFields)
+formData.append('name',sliderFields.name)
+formData.append('brand',sliderFields.brand)
+formData.append('category',sliderFields.category)
+formData.append('subCategory',sliderFields.subCategory)
+formData.append('productID', sliderFields.productID)
+formData.append('description',sliderFields.description)
+      
+try {
+  const { data } = await axios.put(`/api/sliders/${productId}`,sliderFields, {
+   headers: { authorization: `Bearer ${userInfo.token}`},
+ });
+if (data.message === 'Slider Updated') {
+toast.success("Slider Updated Successfully")
+       navigate('/admin/sliders')
+     }
+  
+} catch (error) {
+  
+
+          toast.error(getError(error))
+              navigate('/admin/sliders')
+       
+}
+    }
+
+
+
+
 
   //   const deleteFileHandler = async (fileName, f) => {
   //     console.log(fileName, f);
@@ -154,187 +140,85 @@ export default function ProductEditScreen() {
   //     // setImages(images.filter((x) => x !== fileName));
   //     toast.success('Image removed successfully. click Update to apply it');
   //   };
-  console.log(subCategory);
+
   return (
     <Container className="small-container">
       <Helmet>
         <title>Edit Product ${productId}</title>
       </Helmet>
       <h1>Edit Product {productId}</h1>
-
+{/* 
       {loading ? (
         <LoadingBox></LoadingBox>
       ) : error ? (
         <MessageBox variant="danger">{error}</MessageBox>
-      ) : (
-        <Form onSubmit={submitHandler}>
-          <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </Form.Group>
-          {/* <Form.Group className="mb-3" controlId="slug">
-            <Form.Label>Slug</Form.Label>
-            <Form.Control
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-            />
-          </Form.Group> */}
-          {/* <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Price</Form.Label>
-            <Form.Control
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
-          </Form.Group> */}
-          <Form.Group className="mb-3" controlId="image">
-            <Form.Label>Image File</Form.Label>
-            <Form.Control
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="imageFile">
-            <Form.Label>Upload Image</Form.Label>
-            <Form.Control type="file" onChange={uploadFileHandler} />
-            {loadingUpload && <LoadingBox></LoadingBox>}
-          </Form.Group>
+      ) : ( */}
+        <Form onSubmit={submitUpdateForm}>
+         <div className='row'>
+            <div className='col-md-6 col-sm-12'>
+              <label>Slider Name</label>
+              <input  value={sliderFields.name} className='form-control' name='name' onChange={handleSlideFields}/>
+            </div>
+            <div className='col-md-6 col-sm-12'>
+              <label>Brand Name</label>
+              <input value={sliderFields.brand} className='form-control' name='brand' onChange={handleSlideFields}/>
+            </div>
+          </div>
 
-          {/* <Form.Group className="mb-3" controlId="additionalImage">
-            <Form.Label>Additional Images</Form.Label>
-            {images.length === 0 && <MessageBox>No image</MessageBox>}
-            <ListGroup variant="flush">
-              {images.map((x) => (
-                <ListGroup.Item key={x}>
-                  {x}
-                  <Button variant="light" onClick={() => deleteFileHandler(x)}>
-                    <i className="fa fa-times-circle"></i>
-                  </Button>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </Form.Group> */}
-          {/* <Form.Group className="mb-3" controlId="additionalImageFile">
-            <Form.Label>Upload Aditional Image</Form.Label>
-            <Form.Control
-              type="file"
-              onChange={(e) => uploadFileHandler(e, true)}
-            />
-            {loadingUpload && <LoadingBox></LoadingBox>}
-          </Form.Group> */}
-          <Form.Group className="mb-3" controlId="description">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="brand">
-            <Form.Label>Brand</Form.Label>
-            <Form.Control
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="category">
-            <Form.Label>Category</Form.Label>
-            <Form.Control
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="category">
-            <h2>Sub Category</h2>
+          <div className='row'>
+            <div className='col-md-6 col-sm-12'>
+              <label>Category</label>
+              <select className='form-select'  value={sliderFields.category} name='category' onChange={handleSlideFields}>
+                {categories.map((category) => (
+                  <option  value={category.slug}  key={category.slug} >{category.name}</option>
+               ))}
+              </select>
+ 
+            </div>
+            <div className='col-md-6 col-sm-12'>
+            <label>Sub Category</label>
+            <select className='form-select' value={sliderFields.subCategory} name='subCategory' onChange={handleSlideFields}>
+               {subCategories.map((subCat) => (
+                 <option value={subCat.slug} key={subCat.slug}>{subCat.name}</option>
+                 ))}
+                 <option value=''>No Sub Category</option>
+              </select>
+            </div>
+          </div>
 
-            {subCategory.map((ele) => {
-              return (
-                <div>
-                  <Form.Label>name</Form.Label>
-                  <Form.Control
-                    value={ele.name}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <Form.Label>slug</Form.Label>
-                  <Form.Control
-                    value={ele.slug}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <Form.Label>image</Form.Label>
-                  <Form.Control
-                    value={ele.image}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <Form.Group className="mb-3" controlId="imageFile">
-                    <Form.Label>Upload Image</Form.Label>
-                    <Form.Control type="file" onChange={uploadFileHandler} />
-                    {loadingUpload && <LoadingBox></LoadingBox>}
-                  </Form.Group>
-                  <Form.Label>countInStock</Form.Label>
-                  <Form.Control
-                    value={ele.countInStock}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <Form.Label>price</Form.Label>
-                  <Form.Control
-                    value={ele.price}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <Form.Label>productDiscountedPrice</Form.Label>
-                  <Form.Control
-                    value={ele.productDiscountedPrice}
-                    // onChange={(e) => setSubCategory(e.target.value)}
-                    required
-                  />
-                  <hr />
-                </div>
-              );
-            })}
-            {/* <Form.Control
-              value={subCategory}  
-              onChange={(e) => setSubCategory(e.target.value)}
-              required
-            /> */}
-          </Form.Group>
 
-          {/* <Form.Group className="mb-3" controlId="countInStock">
-            <Form.Label>Count In Stock</Form.Label>
-            <Form.Control
-              value={countInStock}
-              onChange={(e) => setCountInStock(e.target.value)}
-              required
-            />
-          </Form.Group> */}
-          {/* <Form.Group className="mb-3" controlId="countInStock">
-            <Form.Label>Discount Price</Form.Label>
-            <Form.Control
-              value={productDiscountedPrice}
-              onChange={(e) => setProductDiscountedPrice(e.target.value)}
-              required
-            />
-          </Form.Group> */}
+          <div className='row'>
+            <div className='col-md-6 col-sm-12'>
+              <label>Product Id</label>
+              <input className='form-control' value={sliderFields.productID} name='productID' onChange={handleSlideFields}/>
+            </div>
+            <div className='col-md-6 col-sm-12'>
+              <label>Description</label>
+             <textarea className='form-control'  value={sliderFields.description} name='description' onChange={handleSlideFields} />
+            </div>
+          </div>
+      
+          <div className='row'>
+             <div className='col-md-6 col-sm-12'>
+              <label>Slider Type</label>
+              <select className='form-select' value={sliderFields.sliderType}  name='sliderType' onChange={handleSlideFields}>
+                <option>Choose option</option>
+                <option value='category'>Category</option>
+                <option value='subCategory'>Sub Category</option>
+                <option value='product'>Product</option>
+                </select>
+            </div>
+          </div>
 
-          <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit">
+          <div className='row justify-content-center mt-2'>
+             <Button style={{width:'80px',marginRight:'10px'}}  onClick={()=>navigate('/admin/sliders')} >
+              Cancel
+            </Button>
+   <Button type="submit" style={{width:'80px'}}>
               Update
             </Button>
-            {loadingUpdate && <LoadingBox></LoadingBox>}
-          </div>
+</div>
         </Form>
-      )}
     </Container>
   );
 }

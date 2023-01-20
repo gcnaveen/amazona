@@ -16,11 +16,12 @@ const initialState = {
     paymentMethod: localStorage.getItem('paymentMethod')
       ? localStorage.getItem('paymentMethod')
       : '',
-    cartItems: localStorage.getItem('cartItems')
-      ? JSON.parse(localStorage.getItem('cartItems'))
+    cartItems:localStorage.getItem('userInfo') && localStorage.getItem(`${JSON.parse(localStorage.getItem('userInfo'))._id}`) 
+      ? JSON.parse(localStorage.getItem(`${JSON.parse(localStorage.getItem('userInfo'))._id}`))
       : [],
   },
 };
+console.log("initial render")
 function reducer(state, action) {
   switch (action.type) {
     case 'SET_FULLBOX_ON':
@@ -38,13 +39,15 @@ function reducer(state, action) {
             item._id === existItem._id ? newItem : item
           )
         : [...state.cart.cartItems, newItem];
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      let userID=JSON.parse(localStorage.getItem('userInfo'))._id
+      localStorage.setItem(`${userID}`, JSON.stringify(cartItems));
       return { ...state, cart: { ...state.cart, cartItems } };
     case 'CART_REMOVE_ITEM': {
       const cartItems = state.cart.cartItems.filter(
         (item) => item._id !== action.payload._id
       );
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+       let userID=JSON.parse(localStorage.getItem('userInfo'))._id
+      localStorage.setItem(`${userID}`, JSON.stringify(cartItems));
       return { ...state, cart: { ...state.cart, cartItems } };
     }
     case 'USER_SIGNIN':
@@ -89,14 +92,26 @@ function reducer(state, action) {
       };
     case 'CART_CLEAR':
       return { ...state, cart: { ...state.cart, cartItems: [] } };
+    
+    
+    case 'INITIAL_STATE':
+      console.log(action.payload)
+      // return state
+      return  { ...state, cart: { ...state.cart, cartItems:action.payload.items } };
 
     default:
       return state;
   }
 }
 
+
+const getInitialValues = (items) => {
+  console.log({...initialState.cart, cartItems:items})
+  return {...initialState.cart, cartItems:items }
+}
+
 export function StoreProvider(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const value = { state, dispatch };
+  const value = { state, dispatch,getInitialValues };
   return <Store.Provider value={value}>{props.children} </Store.Provider>;
 }

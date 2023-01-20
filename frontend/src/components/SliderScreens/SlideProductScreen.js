@@ -50,7 +50,7 @@ export default function SlideProductScreen() {
   const navigate = useNavigate();
   const params = useParams();
   const { slug } = params;
-  //   console.log(slug);
+    console.log(slug);
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
   const [{ loading, error, slider, loadingCreateReview }, dispatch] =
@@ -65,7 +65,6 @@ export default function SlideProductScreen() {
       console.log('result');
 
       try {
-        console.log('result1');
 
         const result = await axios.get(`/api/sliders/slug/${slug}`);
         console.log('result', result.data);

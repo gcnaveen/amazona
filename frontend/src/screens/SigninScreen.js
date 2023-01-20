@@ -30,7 +30,6 @@ export default function SigninScreen() {
       ctxDispatch({ type: 'USER_SIGNIN', payload: data });
       localStorage.setItem('userInfo', JSON.stringify(data));
       navigate(redirect || '/');
-      console.log('data', data);
     } catch (err) {
       toast.error(getError(err));
     }

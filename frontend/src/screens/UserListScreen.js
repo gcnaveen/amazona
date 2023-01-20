@@ -46,21 +46,21 @@ export default function UserListScreen() {
   const { state } = useContext(Store);
   const { userInfo } = state;
 
+  const fetchData = async () => {
+    try {
+      dispatch({ type: 'FETCH_REQUEST' });
+      const { data } = await axios.get(`/api/users`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      });
+      dispatch({ type: 'FETCH_SUCCESS', payload: data });
+    } catch (err) {
+      dispatch({
+        type: 'FETCH_FAIL',
+        payload: getError(err),
+      });
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/users`, {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        });
-        dispatch({ type: 'FETCH_SUCCESS', payload: data });
-      } catch (err) {
-        dispatch({
-          type: 'FETCH_FAIL',
-          payload: getError(err),
-        });
-      }
-    };
     if (successDelete) {
       dispatch({ type: 'DELETE_RESET' });
     } else {
@@ -85,7 +85,18 @@ export default function UserListScreen() {
       }
     }
   };
-  console.log(state);
+
+
+  const handleUserStatus = async (user) => {
+    const { _id: userID, isActive: status } = user
+    
+    let userResponse = await axios.patch('/api/users/updateUserStatus', { userID, status },    {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        })
+    console.log(userResponse.data)
+      fetchData();
+
+  }
   return (
     <div>
       <Helmet>
@@ -125,12 +136,19 @@ export default function UserListScreen() {
                     Edit
                   </Button> */}
                   &nbsp;
-                  <Button
+                  {/* <Button
                     type="button"
                     variant="light"
                     onClick={() => deleteHandler(user)}
                   >
                     Delete
+                  </Button> */}
+                  <Button
+                    type="button"
+                    variant="light"
+                    onClick={() => handleUserStatus(user)}
+                  >
+                 { user.isActive ? "BLOCK" : "UNBLOCK"}
                   </Button>
                 </td>
               </tr>

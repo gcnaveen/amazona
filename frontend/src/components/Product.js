@@ -6,6 +6,7 @@ import Rating from './Rating';
 import axios from 'axios';
 import { useContext } from 'react';
 import { Store } from '../Store';
+import { toast } from 'react-toastify';
 
 export default function Product(props) {
   const { state, dispatch: ctxDispatch } = useContext(Store);
@@ -25,6 +26,7 @@ export default function Product(props) {
       type: 'CART_ADD_ITEM',
       payload: { ...item, quantity },
     });
+    toast.success(`${item.name} Added to the cart`);
   };
   const discountPrice =
     props.product.price - props.product.productDiscountedPrice;
@@ -33,7 +35,9 @@ export default function Product(props) {
   );
   // console.log('in side product', state.userInfo?.isAdmin);
   return (
-    <Card style={{ background: '#f8f9fa' }}>
+    <Card
+      style={{ background: '#f8f9fa', minWidth: '280px', minHeight: '480px' }}
+    >
       <Link to={`/product/${props.product.slug}`}>
         <img
           src={props.product.image}

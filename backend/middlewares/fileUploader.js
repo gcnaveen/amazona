@@ -1,23 +1,22 @@
+
 import express from 'express';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
-import { isAdmin, isAuth } from '../utils.js';
 
 const upload = multer();
 
-const uploadRouter = express.Router();
-
-uploadRouter.post(
-  '/',
-  isAuth,
-  isAdmin,
-  upload.array('file'),
-  async (req, res) => {
 
 
-    
-    cloudinary.config({
+
+
+export const fileUploader=  async (req, res, next) => {
+  const middleware=  upload.array('file')
+
+  return middleware(req, res, async () => {
+
+    try {
+        cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -31,7 +30,6 @@ uploadRouter.post(
             reject(error);
           }
         });
-        console.log("req inside fn",req)
         streamifier.createReadStream(req.buffer).pipe(stream);
       });
     };
@@ -43,7 +41,15 @@ uploadRouter.post(
       const result = await streamUpload(localFile);
       imageUrlList.push(result.url);
     }
-    res.send(imageUrlList);
-  }
-);
-export default uploadRouter;
+    req.filesURL= await imageUrlList
+    next()
+    } catch (error) {
+        
+      console.log(error)
+    }
+    
+  })
+
+
+
+}

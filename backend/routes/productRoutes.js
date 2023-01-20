@@ -1,9 +1,140 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
+import { fileUploader } from '../middlewares/fileUploader.js';
+import Category from '../models/productCategoryModel.js';
 import Product from '../models/productModel.js';
 import { isAuth, isAdmin } from '../utils.js';
 
 const productRouter = express.Router();
+
+
+
+productRouter.get('/productIds', async (req, res) => {
+  const products = await Product.find({}, {_id:1});
+  res.send(products);
+});
+
+
+productRouter.delete('/deleteCategory/:id', expressAsyncHandler(async (req, res) => {
+  const {id}=req.params
+  
+
+  try {
+  let deletedCat=await Category.findByIdAndDelete({_id:id})
+  res.status(200).send({ message: 'Category Deleted' });
+} catch (error) {
+    res.status(400).send({ message: 'Something went wrong' });
+  
+}
+
+
+
+}))
+productRouter.get('/getAllCats', expressAsyncHandler(async (req, res) => {
+  let categories=await Category.find({})
+  if (categories) {
+    
+    res.send(categories)
+  }
+  else{
+      res.status(404).send({ message: 'Categories Not Found' });
+    
+  }
+
+}))
+
+productRouter.post('/newCategory', expressAsyncHandler( async (req, res) => {
+  const { name, subCategory,slug } = req.body
+  console.log("creat cate ",req.body)
+
+ if (!name || !slug) {
+    res.status(422).send({ message: 'Insufficient Details' });
+    return
+  }
+
+
+try {
+    let newCategory = new Category({
+    name,
+    slug,
+    subCategory:subCategory
+    })
+  let createdCategory=await newCategory.save()
+  res.send({ message: 'Category Created' });
+} catch (error) {
+    res.status(400).send({ message: 'Something went wrong' });
+}
+}))
+
+productRouter.put('/updateCategory/:id', expressAsyncHandler( async (req, res) => {
+
+  const { id } = req.params
+   const { name, subCategory,slug } = req.body
+
+ if (!name || !slug) {
+    res.status(422).send({ message: 'Insufficient Details' });
+    return
+  }
+
+
+try {
+    let updatedCat = await Category.findByIdAndUpdate({ _id:id },
+  {name,slug,subCategory})
+
+  res.send({ message: 'Category Updated' });
+
+} catch (error) {
+    res.status(400).send({ message: 'Something went wrong' });
+}
+}))
+
+
+
+
+
+
+
+productRouter.post('/createProduct', fileUploader, expressAsyncHandler(async (req, res) => {
+const files= req.filesURL
+  let rating = 0
+  let numReviews = 0
+  const image=files?.splice(0,1)[0]
+  const images = files
+  
+  const { name, slug, brand, category, subCategory, description, price, countInStock, productDiscountedPrice, categoryID } = req.body
+ if (!name || !slug ||  !brand ||   !category  || !description || !price || !countInStock || !productDiscountedPrice || !categoryID) {
+    res.status(422).send({ message: 'Insufficient Details' });
+    return
+  }
+
+ try {
+   let newProduct = new Product({
+    name, slug, brand, category, subCategory,
+    description, price, countInStock,
+    productDiscountedPrice, rating, numReviews,image,images,categoryID
+    })
+  let createProduct=await newProduct.save()
+  res.status(200).send({ message: 'Product Created' });
+ 
+ } catch (error) {
+    res.status(400).send({ message: 'Something went wrong' });
+ }
+  
+
+
+  // else {
+  //   res.status(422).send({ message: 'Insufficient Details' });
+
+  // }
+
+}))
+
+
+
+
+
+
+
 
 productRouter.get('/', async (req, res) => {
   const products = await Product.find();
@@ -37,25 +168,44 @@ productRouter.put(
   '/:id',
   isAuth,
   isAdmin,
+  fileUploader,
   expressAsyncHandler(async (req, res) => {
     const productId = req.params.id;
-    const product = await Product.findById(productId);
-    if (product) {
-      product.name = req.body.name;
-      product.slug = req.body.slug;
-      product.price = req.body.price;
-      product.image = req.body.image;
-      product.images = req.body.images;
-      product.category = req.body.category;
-      product.brand = req.body.brand;
-      product.countInStock = req.body.countInStock;
-      product.description = req.body.description;
-      product.productDiscountedPrice = req.body.productDiscountedPrice;
-      await product.save();
-      res.send({ message: 'Product Updated' });
-    } else {
-      res.status(404).send({ message: 'Product Not Found' });
-    }
+    const files= req.filesURL
+
+ 
+    const { name, slug, brand, category, subCategory, description, price, countInStock, productDiscountedPrice, categoryID,IMAGE_STATUS} = req.body
+    // console.log("body",req.body)
+ if (!name || !slug ||  !brand ||   !category || !description || !price || !countInStock || !productDiscountedPrice || !categoryID) {
+    res.status(422).send({ message: 'Insufficient Details' });
+    return
+  }
+    try {
+      const product = await Product.findById(req.params.id);
+      let image = product.image
+      let images = product.images
+      if (IMAGE_STATUS === "ALL_IMAGES") {
+        image = files?.splice(0, 1)[0]
+        images = files
+      }
+      else if (IMAGE_STATUS === "ADDITIONAL_IMAGE") {
+        images = files
+      }
+      else if (IMAGE_STATUS === "ADDITIONAL_IMAGE") {
+        image = files?.splice(0, 1)[0]
+      }
+     
+   let updateProduct = await Product.findByIdAndUpdate({_id:productId},{
+    name, slug, brand, category, subCategory,
+    description, price, countInStock,
+    productDiscountedPrice,categoryID,image,images
+    })
+   res.status(200).send({ message: 'Product Updated' });
+   
+ } catch (error) {
+      console.log(error)
+       res.status(400).send({ message: 'Something went wrong' });
+ }
   })
 );
 
@@ -141,6 +291,8 @@ productRouter.get(
     const pageSize = query.pageSize || PAGE_SIZE;
     const page = query.page || 1;
     const category = query.category || '';
+    const subCategory = query.subCategory || '';
+    const categoryID = query.categoryID || '';
     const price = query.price || '';
     const rating = query.rating || '';
     const order = query.order || '';
@@ -156,6 +308,8 @@ productRouter.get(
           }
         : {};
     const categoryFilter = category && category !== 'all' ? { category } : {};
+    const subCategoryFilter = subCategory && subCategory !== 'all' ? { subCategory } : {};
+    const categoryIDFilter = categoryID && categoryID !== 'all' ? { categoryID } : {};
     const ratingFilter =
       rating && rating !== 'all'
         ? {
@@ -190,6 +344,8 @@ productRouter.get(
     const products = await Product.find({
       ...queryFilter,
       ...categoryFilter,
+      ...categoryIDFilter,
+      ...subCategoryFilter,
       ...priceFilter,
       ...ratingFilter,
     })

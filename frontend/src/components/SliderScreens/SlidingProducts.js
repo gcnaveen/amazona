@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 // import Rating from './Rating';
@@ -8,6 +8,13 @@ import { useContext } from 'react';
 import data from '../../data';
 import Rating from '../Rating';
 import { Store } from '../../Store';
+import MessageBox from '../MessageBox';
+import SwiperCore, {
+  Navigation
+} from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Col } from 'react-bootstrap';
+import { toast } from 'react-toastify';
 // import { Store } from '../Store';
 
 const reducer = (state, action) => {
@@ -24,24 +31,34 @@ const reducer = (state, action) => {
 };
 
 export default function SlidingProducts() {
-  const { state, dispatch: ctxDispatch } = useContext(Store);
-  const {
+  
+ const { state, dispatch: ctxDispatch } = useContext(Store);
+   
+  const {userInfo,
     cart: { cartItems },
-  } = state;
-  const [{ loading, error, sliders }, dispatch] = useReducer(reducer, {
-    sliders: [],
-    loading: true,
-    error: '',
-  });
+    } = state;
+  const [sliders, setSlider] = useState([])
+  
+
+
+    const {state:navValues}=useLocation()
+  const { sliderType, sliderValue,name } = navValues
+  console.log(name)
+  const {sliderID}=useParams()
+  
+  const navigate=useNavigate()
   useEffect(() => {
     const fetchData = async () => {
-      dispatch({ type: 'FETCH_REQUEST' });
-      try {
-        const result = await axios.get('/api/sliders');
-        dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
-      } catch (err) {
-        dispatch({ type: 'FETCH_FAIL', payload: err.message });
-      }
+      console.log(sliderValue)
+      let result = await axios.get(`/api/products/search?category=${sliderValue}`);
+
+      if (sliderType === "subCategory") {
+        result = await axios.get(`/api/products/search?subCategory=${sliderValue}`);
+            
+          }
+             console.log(result.data.products)
+             setSlider(result.data.products)
+
     };
     fetchData();
   }, []);
@@ -73,9 +90,7 @@ export default function SlidingProducts() {
   //     })
   //   );
 
-  const _slider = sliders.map((slide) => {
-    return slide.subCategory.map((ele) => ele);
-  });
+
   // console.log(
   //   'object',
   //   _slider.map((ele) => ele[0]._id)
@@ -85,18 +100,9 @@ export default function SlidingProducts() {
   //   console.log('object', _slider1);
 
   const addToCartHandler = async (item) => {
-    const _Slider = item.map((ele) => ele[0]._id);
-    console.log(_Slider);
-    // const _item = item.map((ele) => ele);
-    // const ic = _item[0].map((ele) => ele.id);
-    // console.log(ic);
-    //   const productId = sliders.map((slide) => {
-    //     return slide.subCategory.map((ele) => ele._id);
-    //   });
-    const existItem = cartItems.find((x) => x._id === sliders._id);
+ const existItem = cartItems.find((x) => x._id === item._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
-    const { data } = await axios.get(`/api/sliders/${_Slider}`);
-    console.log('data', data);
+    const { data } = await axios.get(`/api/products/${item._id}`);
     if (data.countInStock < quantity) {
       window.alert('Sorry. Product is out of stock');
       return;
@@ -105,28 +111,67 @@ export default function SlidingProducts() {
       type: 'CART_ADD_ITEM',
       payload: { ...item, quantity },
     });
+      toast.success(`${item.name} Added to the cart`)
   };
-  console.log(sliders);
+
+
+
+  if (sliders.length === 0) {
+    return <>
+      {sliderType === 'category' ? <h4> Category : {name}</h4> : sliderType === 'subCategory' ? <h4> Sub Category : {name}</h4> : <h4> Product : {name}</h4>}
+      <MessageBox variant="danger">
+        <h4>No Products </h4>
+       </MessageBox>
+  </> 
+}
+
+
 
   return (
     <div>
-      <h1>Products</h1>
+      {sliderType === 'category' ? <h4> Category : { name}</h4> : sliderType === 'subCategory' ? <h4> Sub Category : {name}</h4> : <h4> Product : { name}</h4>}
       <div className="products">
-        {sliders.map((slide) => {
-          console.log(slide.subCategory[0]);
-          return slide.subCategory.map((ele) => (
-            <div className="product">
-              <Card style={{ background: '#f8f9fa', width: '300px' }}>
-                <Link to={`/sliders/${ele.slug}`}>
+        {sliders.map((ele) => {
+          return <div className="product" key={ele._id}>
+            <Card style={{ background: '#f8f9fa', width: '300px' }}>
+              {console.log(ele)}
+
+   <div style={{width:'100%'}}>
+                  <Swiper
+                    sidesPerView={3}
+                    spaceBetween={40}
+                    slidesPerGroup={1}
+                        loop={true}
+                        navigation={true}
+                      >
+                    {([ele.image,... ele.images]).map((x,i) => (
+                      <Col key={i}>
+                       
+                        <SwiperSlide>
+                            <img
+                           className='list-img-size'
+             onClick={() => navigate(`/product/${ele.slug}`)}
+             src={x} 
+            alt={ele.name}
+          />
+                              {/* <Card.Img variant="top" src={x} alt="product"     onClick={() => setSelectedImage(x)} /> */}
+                            </SwiperSlide>
+                      </Col>
+                    ))}
+                  </Swiper>
+                </div>
+
+              {/* <Link to={`/product/${ele.slug}`}>
                   <img
-                    src={ele.image}
+                    src={ele.images[0] ? ele.images[0] : ele.image}
                     className="card-img-top"
                     alt={ele.name}
                     style={{ height: '261px' }}
                   />
-                </Link>
-                <Card.Body>
-                  <Link to={`/sliders/${ele.slug}`}>
+                </Link> */}
+              <Card.Body>
+                {console.log(ele)}
+                  <Link to={`/product/${ele.slug}`}>
                     <Card.Title>{ele.name}</Card.Title>
                   </Link>
                   <Rating rating={ele.rating} numReviews={ele.numReviews} />
@@ -168,7 +213,7 @@ export default function SlidingProducts() {
                       </Button>
                     )
                   ) : state?.userInfo?.isAdmin ? null : (
-                    <Button onClick={() => addToCartHandler(_slider)}>
+                    <Button onClick={() => addToCartHandler(ele)}>
                       Add to cart
                     </Button>
                   )}
@@ -187,7 +232,6 @@ export default function SlidingProducts() {
                 <button>Add to cart</button>
               </div> */}
             </div>
-          ));
         })}
       </div>
     </div>

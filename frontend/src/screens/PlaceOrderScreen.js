@@ -73,7 +73,7 @@ export default function PlaceOrderScreen() {
       console.log(data);
       ctxDispatch({ type: 'CART_CLEAR' });
       dispatch({ type: 'CREATE_SUCCESS' });
-      localStorage.removeItem('cartItems');
+      localStorage.removeItem(`${userInfo._id}`);
       swal({
         title: 'Success',
         text: ` ${data.order.orderItems.map(
@@ -82,13 +82,12 @@ export default function PlaceOrderScreen() {
         icon: 'success',
         button: 'close',
       });
-      // navigate(`/order/${data.order._id}`);
+      navigate(`/order/${data.order._id}`);
     } catch (err) {
       dispatch({ type: 'CREATE_FAIL' });
       toast.error(getError(err));
     }
   };
-
   useEffect(() => {
     if (!cart.paymentMethod) {
       navigate('/payment');

@@ -1,4 +1,4 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes, useNavigation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import HomeScreen from './screens/HomeScreens';
@@ -42,16 +42,24 @@ import SliderCartScreen from './components/SliderScreens/SliderCartScreen';
 import SlideListScreen from './components/SliderScreens/SlideListScreen';
 import SliderEditScreen from './components/SliderScreens/SliderEditScreen';
 import EditShippingAdress from './screens/EditShippingAdress';
+import { NavItem } from 'react-bootstrap';
+import CreateSlide from './components/SliderScreens/CreateSlide';
+import CategoryWiseProductList from './screens/CategoryWiseProductList';
+import { NavLink } from 'react-router-dom';
+import SubMenuComp from './components/Sidebar/SubMenu';
+import CreateProduct from './screens/CreateProduct';
+import CreateCateogry from './screens/CreateCateogry';
 // import swal from 'sweetalert';
 
 function App() {
-  const { state, dispatch: ctxDispatch } = useContext(Store);
+  const { state, dispatch: ctxDispatch,getInitialValues } = useContext(Store);
   const { fullBox, cart, userInfo } = state;
   const signoutHandler = () => {
     ctxDispatch({ type: 'USER_SIGNOUT' });
     localStorage.removeItem('userInfo');
     localStorage.removeItem('shippingAddress');
     localStorage.removeItem('paymentMethod');
+    // localStorage.removeItem('cartItems');
     window.location.href = '/signin';
   };
   const [sidebarIsOpen, setSidebarIsOpen] = useState(false);
@@ -60,16 +68,22 @@ function App() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const { data } = await axios.get(`/api/products/categories`);
+        const { data } = await axios.get(`/api/products/getAllCats`);
         setCategories(data);
       } catch (err) {
         toast.error(getError(err));
       }
     };
-    fetchCategories();
-  }, []);
 
-  console.log('user', state);
+    fetchCategories();
+  }, [state]);
+
+  
+
+
+
+
+  // console.log('user', state);
 
   // const brandHandler = (userInfo) => {
   //   if (userInfo && userInfo?.length) {
@@ -82,7 +96,11 @@ function App() {
   //     setUpdatedList(list);
   //   }
   // };
-  console.log('userInfo', userInfo);
+  // console.log('userInfo', userInfo);
+
+
+
+
 
   return (
     <BrowserRouter>
@@ -99,7 +117,7 @@ function App() {
       >
         <ToastContainer position="bottom-center" limit={1} />
         <header>
-          <Navbar bg="dark" variant="dark" expand="lg">
+          <Navbar  variant="dark"  style={{backgroundColor:'#221b68'}} expand="lg">
             <Container>
               <Button
                 variant="dark"
@@ -109,7 +127,7 @@ function App() {
               </Button>
 
               <LinkContainer to="/">
-                <Navbar.Brand>
+                <Navbar.Brand  style={{color:'white'}} > 
                   {/* <img
                     src="https://www.betonamit.com/wp-content/uploads/2020/09/amazon-logo-header-300x188.jpg"
                     alt=""
@@ -126,12 +144,12 @@ function App() {
                 <Nav className="me-auto  w-100  justify-content-end">
                   {userInfo && userInfo.isAdmin ? null : userInfo === null ? (
                     <Link to="/signin" className="nav-link">
-                      <i className="fas fa-shopping-cart"></i>
+                      <i className="fas fa-shopping-cart" style={{color:'white'}}></i>
                       Cart
                     </Link>
                   ) : (
-                    <Link to="/cart" className="nav-link">
-                      <i className="fas fa-shopping-cart"></i>
+                    <Link to="/cart" className="nav-link" style={{color:'white'}}>
+                      <i className="fas fa-shopping-cart" style={{color:'white'}}></i>
                       Cart
                       {cart.cartItems.length > 0 &&
                         (userInfo ? (
@@ -173,7 +191,7 @@ function App() {
                     </NavDropdown>
                   ) : userInfo ? (
                     <div>
-                      <NavDropdown
+                      <NavDropdown style={{color:'white'}}
                         title={userInfo.name}
                         id="basic-nav-dropdown"
                       >
@@ -207,16 +225,23 @@ function App() {
           </Navbar>
         </header>
         <div className="catagory-div">
-          {categories.map((category) => (
-            <Nav.Item key={category}>
-              <LinkContainer
-                to={`/search?category=${category}`}
-                onClick={() => setSidebarIsOpen(false)}
-              >
-                <Nav.Link>{category} &nbsp; &nbsp;</Nav.Link>
-              </LinkContainer>
+              {/* // <NavItem key={i}>{ category}</NavItem> */}
+
+          {categories.map((category,i) => (
+
+
+            
+            <Nav.Item className='category-main-container' key={category.slug}>
+                <NavLink to={`/products/categories?type=category&name=${category.slug}`} style={{textDecoration:'none',color:'#363075',fontSize:'18px'}} >
+                {category.name}
+                </NavLink>
+              <div className='sub-category-div'>
+              {category?.subCategory &&
+                category.subCategory.map((item, i) => (
+                 <NavLink  key={i} to={`/products/categories?type=subCategory&name=${item.slug}`}   className='sub-menu-item' style={{textDecoration:'none',color:'white',}}>{item.name}</NavLink>
+                 ))}
+                 </div>
             </Nav.Item>
-            // <p>{category}</p>
           ))}
         </div>
         {/* <div>
@@ -243,21 +268,20 @@ function App() {
             <Nav.Item>
               <strong>Categories</strong>
             </Nav.Item>
-            {categories.map((category) => (
-              <Nav.Item key={category}>
-                <LinkContainer
-                  to={`/search?category=${category}`}
-                  onClick={() => setSidebarIsOpen(false)}
-                >
-                  <Nav.Link>{category}</Nav.Link>
-                </LinkContainer>
-              </Nav.Item>
+            <div className='side-bar-nav'>
+            {categories.map((category,i) => (
+
+                  // <NavItem key={i}>{ category}</NavItem>
+           <SubMenuComp   key={category.slug} category={category} />
             ))}
+              </div>
           </Nav>
         </div>
-        <main>
-          <Container className="mt-3">
+        <main  style={{overflowX:'hidden'}}>
+          <Container className="mt-3"  style={{overflowX:'hidden'}}>
+            
             <Routes>
+              <Route path="/products/categories" element={<CategoryWiseProductList />} />
               <Route path="/product/:slug" element={<ProductScreen />} />
               <Route path="/cart" element={<CartScreen />} />
               <Route path="/signin" element={<SigninScreen />} />
@@ -310,7 +334,7 @@ function App() {
               />
               {/* slide Route */}
               <Route
-                path="/slider"
+                path="/slider/:sliderID"
                 element={
                   <ProtectedRoute>
                     <SlidingProducts />
@@ -324,6 +348,14 @@ function App() {
                 element={
                   <AdminRoute>
                     <SlideListScreen />
+                  </AdminRoute>
+                }
+              ></Route>
+              <Route
+                path="/admin/sliders/createSlide"
+                element={
+                  <AdminRoute>
+                    <CreateSlide />
                   </AdminRoute>
                 }
               ></Route>
@@ -349,6 +381,22 @@ function App() {
                 element={
                   <AdminRoute>
                     <ProductListScreen />
+                  </AdminRoute>
+                }
+              ></Route>
+              <Route
+                path='/admin/createCategory'
+                element={
+                  <AdminRoute>
+                    <CreateCateogry />
+                  </AdminRoute>
+                }
+              ></Route>
+              <Route
+                path="/admin/product/createProduct"
+                element={
+                  <AdminRoute>
+                    <CreateProduct />
                   </AdminRoute>
                 }
               ></Route>

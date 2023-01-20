@@ -40,6 +40,7 @@ export default function OrderHistoryScreen() {
           { headers: { Authorization: `Bearer ${userInfo.token}` } }
         );
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
+        console.log(data)
       } catch (error) {
         dispatch({
           type: 'FETCH_FAIL',
@@ -49,6 +50,12 @@ export default function OrderHistoryScreen() {
     };
     fetchData();
   }, [userInfo]);
+
+
+  if (orders?.length=== 0) {
+  return <MessageBox>No Active Orders</MessageBox>
+}
+
   return (
     <div>
       <Helmet>
@@ -67,7 +74,7 @@ export default function OrderHistoryScreen() {
               <th>DATE</th>
               <th>TOTAL</th>
               <th>PAID</th>
-              <th>DELIVERED</th>
+              <th>STATUS</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
@@ -86,9 +93,7 @@ export default function OrderHistoryScreen() {
                 <td>{order.totalPrice.toFixed(2)}</td>
                 <td>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</td>
                 <td>
-                  {order.isDelivered
-                    ? order.deliveredAt.substring(0, 10)
-                    : 'No'}
+                  { order.isDispatched && !order.isOutForDelivery &&  !order.isDelivered  ? "Dispatched"  :  order.isOutForDelivery && order.isDispatched && !order.isDelivered ? "Out For Delivery" : order.isDelivered ? "Delivered" : order.isOrderAccepted ? "Order Accepted" : order.isOrderRejected ? "Order Rejected": order.isCancelled ? "Order Cancelled" :  "Pending"}
                 </td>
                 <td>
                   <Button

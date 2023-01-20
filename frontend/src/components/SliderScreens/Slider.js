@@ -3,7 +3,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import Container from 'react-bootstrap/esm/Container';
 import Row from 'react-bootstrap/esm/Row';
 import Col from 'react-bootstrap/esm/Col';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import LoadingBox from '../LoadingBox';
@@ -24,17 +24,20 @@ const reducer = (state, action) => {
 
 function Slider() {
   const [index, setIndex] = useState(0);
+  const navigate=useNavigate()
   const [{ loading, error, sliders }, dispatch] = useReducer(reducer, {
     sliders: [],
     loading: true,
     error: '',
   });
+  // console.log("Hello from slider")
 
   useEffect(() => {
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
       try {
         const result = await axios.get('/api/sliders');
+        // console.log(result.data)
         dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: err.message });
@@ -46,34 +49,58 @@ function Slider() {
   const handleSelect = (selectedIndex, e) => {
     setIndex(selectedIndex);
   };
+
+
+
+  const navigateToSlier = (slide) => {
+    console.log(slide)
+    if (slide.sliderType === 'category' || slide.sliderType === 'subCategory') {
+
+      let sliderValue = slide.category
+      if (slide.sliderType === 'subCategory') {
+        sliderValue=slide.subCategory
+      }
+let navValues={sliderType:slide.sliderType,sliderValue,name:slide.name}
+      navigate(`/slider/${slide._id}`,{state:navValues})
+      
+    }
+    else {
+      
+      navigate(`/product/sliderProduct`, { state:slide.productID})
+
+    }
+}
+
+
   // console.log(sliders);
   return (
     <Carousel
-      style={{ height: '300px', width: '1100px' }}
+      style={{ height: '300px', width: '100%' }}
       activeIndex={index}
       onSelect={handleSelect}
     >
-      {sliders.map((slide) => {
+      {sliders.map((slide,i) => {
         return (
-          <Carousel.Item style={{ height: '300px' }}>
+          <Carousel.Item   key={i} style={{ height: '300px' }}>
             <Row>
               <Col className="hero__section">
-                <Link to={`/slider`}>
+                {/* <Link to={`/slider/${slide._id}`}> */}
+                <div onClick={()=>navigateToSlier(slide)}>
                   <img
                     className="d-block w-100"
-                    src={slide.image}
+                    src={slide.images[0]}
                     alt={slide.name}
-                    width="400"
+                    width="100%"
                     height="400"
                     style={{
                       display: 'block',
                       maxHeight: '350px',
-                      maxWidth: '1100px',
                       width: 'auto',
                       height: 'auto',
                     }}
-                  />
-                </Link>
+                    />
+                    </div>
+                {/* </Link> */}
                 {/* <img
                   className="d-block w-100"
                   src={slide.image}

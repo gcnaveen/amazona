@@ -12,34 +12,6 @@ import { toast } from 'react-toastify';
 import ListGroup from 'react-bootstrap/ListGroup';
 import { Helmet } from 'react-helmet-async';
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'FETCH_REQUEST':
-      return { ...state, loading: true };
-    case 'FETCH_SUCCESS':
-      return { ...state, loading: false };
-    case 'FETCH_FAIL':
-      return { ...state, loading: false, error: action.payload };
-    case 'UPDATE_REQUEST':
-      return { ...state, loadingUpdate: true };
-    case 'UPDATE_SUCCESS':
-      return { ...state, loadingUpdate: false };
-    case 'UPDATE_FAIL':
-      return { ...state, loadingUpdate: false };
-    case 'UPLOAD_REQUEST':
-      return { ...state, loadingUpload: true, errorUpload: '' };
-    case 'UPLOAD_SUCCESS':
-      return {
-        ...state,
-        loadingUpload: false,
-        errorUpload: '',
-      };
-    case 'UPLOAD_FAIL':
-      return { ...state, loadingUpload: false, errorUpload: action.payload };
-    default:
-      return state;
-  }
-};
 export default function ProductEditScreen() {
   const navigate = useNavigate();
   const params = useParams(); // /product/:id
@@ -47,239 +19,222 @@ export default function ProductEditScreen() {
 
   const { state } = useContext(Store);
   const { userInfo } = state;
-  const [{ loading, error, loadingUpdate, loadingUpload }, dispatch] =
-    useReducer(reducer, {
-      loading: true,
-      error: '',
-    });
 
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [price, setPrice] = useState('');
-  const [image, setImage] = useState('');
-  const [images, setImages] = useState([]);
-  const [category, setCategory] = useState('');
-  const [countInStock, setCountInStock] = useState('');
-  const [brand, setBrand] = useState('');
-  const [description, setDescription] = useState('');
-  const [productDiscountedPrice, setProductDiscountedPrice] = useState('');
+   
+const [productFields,setProductFields]=useState({name:'',slug:'',brand:'',category:'',subCategory:'',description:'',price:'',
+countInStock:'',productDiscountedPrice:'',categoryID:'',image:'',images:[]})
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/products/${productId}`);
-        setName(data.name);
-        setSlug(data.slug);
-        setPrice(data.price);
-        setImage(data.image);
-        setImages(data.images);
-        setCategory(data.category);
-        setCountInStock(data.countInStock);
-        setBrand(data.brand);
-        setDescription(data.description);
-        setProductDiscountedPrice(data.productDiscountedPrice);
-        dispatch({ type: 'FETCH_SUCCESS' });
-      } catch (err) {
-        dispatch({
-          type: 'FETCH_FAIL',
-          payload: getError(err),
-        });
-      }
-    };
-    fetchData();
-  }, [productId]);
+const [productImages,setProductImages]=useState({image:'',images:[]})
+  const [categories,setCategories]=useState([])
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      dispatch({ type: 'UPDATE_REQUEST' });
-      await axios.put(
-        `/api/products/${productId}`,
-        {
-          _id: productId,
-          name,
-          slug,
-          price,
-          image,
-          images,
-          category,
-          brand,
-          countInStock,
-          description,
-          productDiscountedPrice,
-        },
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
+    const [subCategories, setSubCategories] = useState([]);
+    
+    
+    useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const { data } = await axios.get(`/api/products/getAllCats`);
+          setCategories(data);
+        } catch (err) {
+          console.log(err)
         }
-      );
-      dispatch({
-        type: 'UPDATE_SUCCESS',
-      });
-      toast.success('Product updated successfully');
-      navigate('/admin/products');
-    } catch (err) {
-      toast.error(getError(err));
-      dispatch({ type: 'UPDATE_FAIL' });
+      };
+      fetchCategories();
+    }, []);
+  
+  
+  useEffect(() => {
+    
+    const fetchProduct = async  () => {
+      let { data } = await axios.get(`/api/products/${productId}`)
+      setProductFields({...data})
+      // setProductImages({...productImages,image:data.image,images:data.images})
+    
+  }
+fetchProduct()
+
+
+  },[])
+
+ 
+
+  function handleAdditionalInputFields(e) {
+   
+setProductImages({...productImages,images:e.target.files})
+  
+  } 
+  
+     useEffect(() => {
+       if (productFields.category) {
+    let selectedCategory=categories.find((category)=>{
+  return category.slug===productFields.category
+})
+      setSubCategories(selectedCategory?.subCategory)
     }
-  };
+},[productFields.category])
 
-  const uploadFileHandler = async (e, forImages) => {
-    const file = e.target.files[0];
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
-    try {
-      dispatch({ type: 'UPLOAD_REQUEST' });
-      const { data } = await axios.post('/api/upload', bodyFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          authorization: `Bearer ${userInfo.token}`,
-        },
-      });
-      dispatch({ type: 'UPLOAD_SUCCESS' });
+   
+  function handleInputFields(e) {
+    const { name, value } = e.target
+    if (name === 'category') { 
+let selectedCategory=categories.find((category)=>{
+  return category.slug===value
+})
+      setSubCategories(selectedCategory.subCategory)
+setProductFields({...productFields,categoryID:selectedCategory._id,category:value})
+return
 
-      if (forImages) {
-        setImages([...images, data.secure_url]);
-      } else {
-        setImage(data.secure_url);
       }
-      toast.success('Image uploaded successfully. click Update to apply it');
-    } catch (err) {
-      toast.error(getError(err));
-      dispatch({ type: 'UPLOAD_FAIL', payload: getError(err) });
+    setProductFields({...productFields,[name]:value})
+  
+}
+  
+  function handleMainFile(e) {
+   
+setProductImages({...productImages,image:e.target.files[0]})
+    
+  }
+
+
+async   function handleFormSubmit(e) {
+    e.preventDefault()
+    // console.log(productFields)
+    // console.log(productImages)
+    
+  let filesStatus = 'NO_UPDATE'
+  if (productImages.image && productImages.images.length > 0) {
+    filesStatus = 'ALL_IMAGES'
+    
     }
-  };
+    else if (productImages.images.length > 0) {
+      filesStatus='ADDITIONAL_IMAGE'
+      
+    }
+    else if (productImages.image) {
+      filesStatus='ADDITIONAL_IMAGE'
+    
+  }
+    
+    const formData = new FormData()
+    formData.append('file', productImages.image)
+    for (let i = 0; i < productImages.images.length; i++) {
+      formData.append('file', productImages.images[i])
+      
+    }
+    console.log(productFields)
+    formData.append('name', productFields.name)
+    formData.append('slug', productFields.slug)
+    formData.append('brand', productFields.brand)
+    formData.append('category', productFields.category)
+    formData.append('subCategory', productFields.subCategory)
+    formData.append('description', productFields.description)
+    formData.append('price', productFields.price)
+    formData.append('countInStock', productFields.countInStock)
+    formData.append('productDiscountedPrice', productFields.productDiscountedPrice)
+    formData.append('categoryID', productFields.categoryID)
+    formData.append('IMAGE_STATUS',filesStatus)
+    
 
-  const deleteFileHandler = async (fileName, f) => {
-    console.log(fileName, f);
-    console.log(images);
-    console.log(images.filter((x) => x !== fileName));
-    setImages(images.filter((x) => x !== fileName));
-    toast.success('Image removed successfully. click Update to apply it');
-  };
 
+  
+      try {
+       const { data } = await axios.put(`/api/products/${productId}`,formData, {
+          headers: { authorization: `Bearer ${userInfo.token}`},
+       });
+          if (data.message === 'Product Updated') {
+            toast.success("Product Updated Successfully")
+       navigate('/admin/products')
+             }
+} catch (error) {
+   toast.error(getError(error))
+              navigate('/admin/products')
+}
+
+  }
+
+    
   return (
-    <Container className="small-container">
-      <Helmet>
-        <title>Edit Product ${productId}</title>
-      </Helmet>
-      <h1>Edit Product {productId}</h1>
+    <div className='container'>
+    <form  onSubmit={handleFormSubmit}>
+    <div className='row'>
+      <div className='col-md-6 col-sm-12'>
+        <label>Name</label>
+        <input onChange={handleInputFields} value={productFields.name}  name='name' className='form-control' />
+      </div>
+      <div className='col-md-6 col-sm-12'>
+        <label>Slug</label>
+        <input onChange={handleInputFields} name='slug' value={productFields.slug}  className='form-control' />
+      </div>
+    </div>
 
-      {loading ? (
-        <LoadingBox></LoadingBox>
-      ) : error ? (
-        <MessageBox variant="danger">{error}</MessageBox>
-      ) : (
-        <Form onSubmit={submitHandler}>
-          <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Name</Form.Label>
-            <Form.Control
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="slug">
-            <Form.Label>Slug</Form.Label>
-            <Form.Control
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="name">
-            <Form.Label>Price</Form.Label>
-            <Form.Control
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="image">
-            <Form.Label>Image File</Form.Label>
-            <Form.Control
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="imageFile">
-            <Form.Label>Upload Image</Form.Label>
-            <Form.Control type="file" onChange={uploadFileHandler} />
-            {loadingUpload && <LoadingBox></LoadingBox>}
-          </Form.Group>
 
-          <Form.Group className="mb-3" controlId="additionalImage">
-            <Form.Label>Additional Images</Form.Label>
-            {images.length === 0 && <MessageBox>No image</MessageBox>}
-            <ListGroup variant="flush">
-              {images.map((x) => (
-                <ListGroup.Item key={x}>
-                  {x}
-                  <Button variant="light" onClick={() => deleteFileHandler(x)}>
-                    <i className="fa fa-times-circle"></i>
-                  </Button>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="additionalImageFile">
-            <Form.Label>Upload Aditional Image</Form.Label>
-            <Form.Control
-              type="file"
-              onChange={(e) => uploadFileHandler(e, true)}
-            />
-            {loadingUpload && <LoadingBox></LoadingBox>}
-          </Form.Group>
+    <div className='row'>
+      <div className='col-md-6 col-sm-12'>
+        <label>Category</label>
+          <select className='form-select'  name='category' value={productFields.category}  onChange={handleInputFields}>
+                {categories.map((category) => (
+                  <option  value={category.slug}  key={category.slug} >{category.name}</option>
+               ))}
+              </select>
+      </div>
+       <div className='col-md-6 col-sm-12'>
+        <label>Sub Category</label>
+            <select className='form-select' value={productFields.subCategory} name='subCategory' onChange={handleInputFields}>
+               {subCategories?.map((subCat) => (
+                 <option value={subCat.slug} key={subCat.slug}>{subCat.name}</option>
+                 ))}
+                 <option value=''>No Sub Category</option>
+              </select>
+      </div>
+    </div>
+    <div className='row'>
+      <div className='col-md-4 col-sm-12'>
+        <label>Price</label>
+        <input onChange={handleInputFields} name='price'  value={productFields.price} className='form-control' />
+      </div>
+       <div className='col-md-4 col-sm-12'>
+        <label>Discount Price</label>
+        <input onChange={handleInputFields} name='productDiscountedPrice'   value={productFields.productDiscountedPrice} className='form-control' />
+      </div>
+      <div className='col-md-4 col-sm-12'>
+        <label>Count in Stock</label>
+        <input onChange={handleInputFields} name='countInStock'  value={productFields.countInStock} className='form-control' />
+      </div>
+    </div>
+    <div className='row'>
+      <div className='col-md-6 col-sm-12'>
+        <label>Brand</label>
+        <input onChange={handleInputFields} name='brand'  value={productFields.brand} className='form-control' />
+      </div> 
+      <div className='col-md-6 col-sm-12'>
+        <label>Description</label>
+        <textarea name='description' onChange={handleInputFields}    value={productFields.description} className='form-control' />
+      </div>
+    </div>
+    
+  
+  <div className='row'>
+      <div className='col-md-6 col-sm-12'>
+        <label>Main Image</label>
+        <input onChange={handleMainFile}  name='singleFile' type='file' className='form-control' />
+      </div>
+      <div className='col-md-6 col-sm-12'>
+        <label>Additional Images</label>
+        <input onChange={handleAdditionalInputFields} name='additionalFiles' type='file' className='form-control' multiple />
+      </div>
+    </div>
 
-          <Form.Group className="mb-3" controlId="category">
-            <Form.Label>Category</Form.Label>
-            <Form.Control
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="brand">
-            <Form.Label>Brand</Form.Label>
-            <Form.Control
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="countInStock">
-            <Form.Label>Count In Stock</Form.Label>
-            <Form.Control
-              value={countInStock}
-              onChange={(e) => setCountInStock(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="countInStock">
-            <Form.Label>Discount Price</Form.Label>
-            <Form.Control
-              value={productDiscountedPrice}
-              onChange={(e) => setProductDiscountedPrice(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="description">
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <div className="mb-3">
-            <Button disabled={loadingUpdate} type="submit">
+        <div className='row justify-content-center mt-2'>
+           <Button style={{width:'80px',marginRight:'10px'}}  onClick={()=>navigate('/admin/products')} >
+              Cancel
+            </Button>
+   <Button type="submit" style={{width:'80px'}}>
               Update
             </Button>
-            {loadingUpdate && <LoadingBox></LoadingBox>}
-          </div>
-        </Form>
-      )}
-    </Container>
+  
+</div>
+    </form>
+  
+  </div>
   );
 }

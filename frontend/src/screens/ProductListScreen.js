@@ -94,27 +94,34 @@ export default function ProductListScreen() {
     }
   }, [page, userInfo, successDelete]);
 
+  const  createCategoryHandler = () => {
+  
+    navigate('/admin/createCategory')
+}
+
   const createHandler = async () => {
-    if (window.confirm('Are you sure to create?')) {
-      try {
-        dispatch({ type: 'CREATE_REQUEST' });
-        const { data } = await axios.post(
-          '/api/products',
-          {},
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        toast.success('product created successfully');
-        dispatch({ type: 'CREATE_SUCCESS' });
-        navigate(`/admin/product/${data.product._id}`);
-      } catch (err) {
-        toast.error(getError(error));
-        dispatch({
-          type: 'CREATE_FAIL',
-        });
-      }
-    }
+navigate('/admin/product/createProduct')
+
+    // if (window.confirm('Are you sure to create?')) {
+    //   try {
+    //     dispatch({ type: 'CREATE_REQUEST' });
+    //     const { data } = await axios.post(
+    //       '/api/products',
+    //       {},
+    //       {
+    //         headers: { Authorization: `Bearer ${userInfo.token}` },
+    //       }
+    //     );
+    //     toast.success('product created successfully');
+    //     dispatch({ type: 'CREATE_SUCCESS' });
+    //     navigate(`/admin/product/${data.product._id}`);
+    //   } catch (err) {
+    //     toast.error(getError(error));
+    //     dispatch({
+    //       type: 'CREATE_FAIL',
+    //     });
+    //   }
+    // }
   };
 
   // console.log('in side the prices', products);
@@ -141,10 +148,15 @@ export default function ProductListScreen() {
         <Col>
           <h1>Products</h1>
         </Col>
-        <Col className="col text-end">
+        <Col className="col text-end d-flex justify-content-end" style={{gap:'10px'}} >
           <div>
             <Button type="button" onClick={createHandler}>
               Create Product
+            </Button>
+          </div>
+          <div>
+            <Button type="button" onClick={createCategoryHandler}>
+              Create Category
             </Button>
           </div>
         </Col>

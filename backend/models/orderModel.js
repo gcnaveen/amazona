@@ -45,7 +45,13 @@ const orderSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     isPaid: { type: Boolean, default: false },
     paidAt: { type: Date },
+    isRead: { type: Boolean, default: false },
+    isCancelled: { type: Boolean, default: false },
+    isOrderAccepted: { type: Boolean, default: false },
+    isOrderRejected: { type: Boolean, default: false },
     isDelivered: { type: Boolean, default: false },
+    isDispatched: { type: Boolean, default: false },
+    isOutForDelivery: { type: Boolean, default: false },
     deliveredAt: { type: Date },
   },
   {

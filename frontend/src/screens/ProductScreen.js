@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -23,10 +23,15 @@ import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import { Helmet } from 'react-helmet-async';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Navigation } from 'swiper';
-import 'swiper/swiper.min.css';
+import SwiperCore, {
+  Navigation
+} from 'swiper';
+
+import 'swiper/swiper.min.css'
 import 'swiper/components/navigation/navigation.min.css';
 import 'swiper/components/pagination/pagination.min.css';
+SwiperCore.use([Navigation]);
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -51,6 +56,7 @@ const reducer = (state, action) => {
 
 export default function ProductScreen() {
   let reviewsRef = useRef();
+  const {state:productID}=useLocation()
   const [selectedImage, setSelectedImage] = useState('');
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -63,20 +69,33 @@ export default function ProductScreen() {
       loading: true,
       error: '',
     });
+    console.log(product)
 
   useEffect(() => {
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
       // console.log('aaaa', slug, typeof slug);
       try {
-        const result = await axios.get(`/api/products/slug/${slug}`);
+        
+        // let result = await axios.get(`/api/products/slug/${slug}`);
+
+            let FETCH_URL=`/api/products/slug/${slug}`
+            
+
+        if (slug==="sliderProduct") {
+          FETCH_URL=`/api/products/${productID}`
+        }
+
+
+        let result = await axios.get(FETCH_URL);
+        
         dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
       } catch (err) {
         dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
       }
     };
     fetchData();
-  }, [slug]);
+  }, [productID,slug]);
 
   const { state, dispatch: ctxDispatch } = useContext(Store);
   const { cart, userInfo } = state;
@@ -127,7 +146,7 @@ export default function ProductScreen() {
       dispatch({ type: 'CREATE_FAIL' });
     }
   };
-  console.log('product', product);
+  console.log('product', product.images);
   return loading ? (
     <LoadingBox />
   ) : error ? (
@@ -135,7 +154,8 @@ export default function ProductScreen() {
   ) : (
     <div>
       <Row>
-        <Col md={6}>
+            <Col md={6}>
+              {console.log("selected Image",selectedImage)}
           <img
             className="img-large"
             src={selectedImage || product.image}
@@ -156,27 +176,27 @@ export default function ProductScreen() {
             <ListGroup.Item>Price : Rs{product.price}</ListGroup.Item>
             <ListGroup.Item>
               <Row xs={1} md={2} className="g-2">
-                <div>
+                <div style={{width:'100%'}}>
                   <Swiper
                     sidesPerView={3}
                     spaceBetween={40}
                     slidesPerGroup={1}
-                    loop={true}
-                  >
-                    {[product.image, ...product.images].map((x) => (
-                      <Col key={x}>
-                        <Card>
-                          <Button
-                            className="thumbnail"
-                            type="button"
-                            variant="light"
-                            onClick={() => setSelectedImage(x)}
-                          >
-                            <SwiperSlide>
-                              <Card.Img variant="top" src={x} alt="product" />
+                        loop={true}
+                        navigation={true}
+                      >
+                        {console.log([product.image,... product.images])}
+                    {(product.image || product.image.images.length>0)  &&  [product.image,... product.images]?.map((x,i) => (
+                      <Col key={i}>
+                       
+                        <SwiperSlide>
+                            <img
+                              className='list-img-size'
+             onClick={() => setSelectedImage(x)}
+             src={x} 
+            alt={product.name}
+          />
+                              {/* <Card.Img variant="top" src={x} alt="product"     onClick={() => setSelectedImage(x)} /> */}
                             </SwiperSlide>
-                          </Button>
-                        </Card>
                       </Col>
                     ))}
                   </Swiper>
@@ -312,3 +332,31 @@ export default function ProductScreen() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

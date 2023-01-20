@@ -46,6 +46,20 @@ export default function OrderScreen() {
   const { id: orderId } = params;
   const navigate = useNavigate();
 
+
+
+  const candleOrderHandler = async () => {
+    
+    let response = await axios.get(`/api/orders/cancel/${orderId}`, {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        })
+    console.log(response)
+    fetchOrder()
+}
+
+
+
+
   const [
     {
       loading,
@@ -64,18 +78,18 @@ export default function OrderScreen() {
     loadingPay: false,
   });
   console.log('order', order);
+ async  function  fetchOrder  ()  {
+    try {
+      dispatch({ type: 'FETCH_REQUEST' });
+      const { data } = await axios.get(`/api/orders/${orderId}`, {
+        headers: { authorization: `Bearer ${userInfo.token}` },
+      });
+      dispatch({ type: 'FETCH_SUCCESS', payload: data });
+    } catch (err) {
+      dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
+    }
+  };
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        dispatch({ type: 'FETCH_REQUEST' });
-        const { data } = await axios.get(`/api/orders/${orderId}`, {
-          headers: { authorization: `Bearer ${userInfo.token}` },
-        });
-        dispatch({ type: 'FETCH_SUCCESS', payload: data });
-      } catch (err) {
-        dispatch({ type: 'FETCH_FAIL', payload: getError(err) });
-      }
-    };
 
     if (!userInfo) {
       return navigate('/signin');
@@ -140,7 +154,7 @@ export default function OrderScreen() {
                     </a>
                   )}
                 <br />
-                <Link to={`/adress-edit/${order._id}`}>Edit</Link>
+               {!order.isDispatched && !order.isCancelled && <Link to={`/adress-edit/${order._id}`}>Edit</Link>}
               </Card.Text>
               {order.isDelivered ? (
                 <MessageBox variant="success">
@@ -233,8 +247,19 @@ export default function OrderScreen() {
                     <ListGroup.Item>
                       {loadingDeliver && <LoadingBox></LoadingBox>}
                       <div className="d-grid">
-                        <Button type="button" onClick={deliverOrderHandler}>
+                        <Button type="button" disabled={!order.isOutForDelivery} onClick={deliverOrderHandler}>
                           Deliver Order
+                        </Button>
+                      </div>
+                    </ListGroup.Item>
+                  )}
+                {!userInfo.isAdmin &&
+                 (
+                    <ListGroup.Item>
+                      {loadingDeliver && <LoadingBox></LoadingBox>}
+                      <div className="d-grid">
+                        <Button type="button" disabled={order.isDispatched || order.isCancelled} onClick={candleOrderHandler}>
+                         {order.isCancelled ? "Order Cancelled" : "Cancel Order"}
                         </Button>
                       </div>
                     </ListGroup.Item>

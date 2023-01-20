@@ -1,25 +1,35 @@
 import express from 'express';
 import expressAsyncHandler from 'express-async-handler';
 import data from '../data.js';
+import { fileUploader } from '../middlewares/fileUploader.js';
+import ProductSlider from '../models/SliderModel.js';
 import Slider from '../models/sliderProductModel.js';
 import { isAuth, isAdmin } from '../utils.js';
 
 const sliderRouter = express.Router();
 
+
+
+
+
+
+
 sliderRouter.get('/', async (req, res) => {
-  const sliders = await Slider.find();
+  const sliders = await ProductSlider.find();
   res.status(200).send(sliders);
 });
+
+
 
 sliderRouter.get('/admin', isAuth, isAdmin, async (req, res) => {
   try {
     const { query } = req;
     const page = query.page || 1;
     const pageSize = query.pageSize || 50;
-    const slides = await Slider.find()
+    const slides = await ProductSlider.find()
       .skip(pageSize * (page - 1))
       .limit(pageSize);
-    const countSlides = await Slider.countDocuments();
+    const countSlides = await ProductSlider.countDocuments();
     res.status(200).send({
       slides,
       countSlides,
@@ -34,61 +44,98 @@ sliderRouter.get('/admin', isAuth, isAdmin, async (req, res) => {
   // console.log('inside admin get:::', req);
 });
 
-sliderRouter.post(
-  '/',
-  isAuth,
-  isAdmin,
-  expressAsyncHandler(async (req, res) => {
-    const newSlider = new Slider({
-      name: 'sample name ' + Date.now(),
-      image: '/images/p1.jpg',
-      subCategory: [
-        {
-          name: 'sample name ' + Date.now(),
-          slug: 'sample-name-' + Date.now(),
-          image: '/images/p1.jpg',
-          price: 0,
-          countInStock: 0,
-          rating: 0,
-          numReviews: 0,
-          productDiscountedPrice: 0,
-        },
-      ],
 
-      category: 'sample category',
-      brand: 'sample brand',
 
-      description: 'sample description',
-    });
-    const slider = await newSlider.save();
-    res.status(200).send({ message: 'Product Created', slider });
-  })
-);
+sliderRouter.post('/createSlider', fileUploader, expressAsyncHandler(async (req, res) => {
+const {name,brand,category,subCategory,productID,description,sliderType}=req.body
 
-sliderRouter.put('/:id', isAuth, isAdmin, async (req, res) => {
-  const productId = req.params.id;
-  const product = await Slider.findById(productId);
-  console.log('object');
-  if (product) {
-    product.name = req.body.name;
-    // product.slug = req.body.slug;
-    // product.price = req.body.price;
-    product.image = req.body.image;
-    product.subCategory = req.body.subCategory;
-    product.category = req.body.category;
-    product.brand = req.body.brand;
-    // product.countInStock = req.body.countInStock;
-    product.description = req.body.description;
-    // product.productDiscountedPrice = req.body.productDiscountedPrice;
-    await product.save();
-    res.status(200).send({ message: 'Product Updated' });
-  } else {
-    res.status(404).send({ message: 'Product Not Found' });
+  console.log(req.body)
+    if (!name || !brand || !category  || !description) {
+      res.status(422).send({ message: 'Insufficient Details' });
+      return
   }
+
+  try {
+      const newSlider = new ProductSlider({
+      name,brand,category,subCategory,productID,description,sliderType,images:req.filesURL
+    })
+  
+    const slider = await newSlider.save();
+    res.status(200).send({ message: 'Slider Created', slider });
+  } catch (error) {
+    console.log(error)
+    res.status(422).send({ message: 'Insufficient Details' });
+  }
+  }))
+
+
+
+
+
+
+
+
+
+
+
+// sliderRouter.post(
+//   '/',
+//   isAuth,
+//   isAdmin,
+//   expressAsyncHandler(async (req, res) => {
+//     const newSlider = new Slider({
+//       name: 'sample name ' + Date.now(),
+//       image: '/images/p1.jpg',
+//       subCategory: [
+//         {
+//           name: 'sample name ' + Date.now(),
+//           slug: 'sample-name-' + Date.now(),
+//           image: '/images/p1.jpg',
+//           price: 0,
+//           countInStock: 0,
+//           rating: 0,
+//           numReviews: 0,
+//           productDiscountedPrice: 0,
+//         },
+//       ],
+
+//       category: 'sample category',
+//       brand: 'sample brand',
+
+//       description: 'sample description',
+//     });
+//     const slider = await newSlider.save();
+//     res.status(200).send({ message: 'Product Created', slider });
+//   })
+// );
+
+
+// update slider by id
+sliderRouter.put('/:id', isAuth, isAdmin, async (req, res) => {
+  const sliderID = req.params.id;
+  const { name, brand, category, subCategory, productID, description,sliderType } = req.body
+  if (!name || !brand || !category || !description) {
+    res.status(422).send({ message: 'Insufficient Details' });
+    return
+  }
+
+ try {
+   const product = await ProductSlider.findById(sliderID);
+   if (product) {
+     let updatedSlider = await ProductSlider.findByIdAndUpdate({ _id: sliderID }, {
+       name, brand, category, subCategory, productID, description,sliderType
+     })
+     res.status(200).send({ message: 'Slider Updated', updatedSlider });
+   }
+      // const slider = await updatedSlider.save();
+ } catch (error) {
+  
+   res.status(404).send({ message: 'Product Not Found' });
+ }
+
 });
 
 sliderRouter.get('/:id', async (req, res) => {
-  console.log(Slider);
   // const __id = data.sliders.map((slide) => {
   //   return slide.subCategory.map((ele) => ele);
   // });
@@ -96,7 +143,7 @@ sliderRouter.get('/:id', async (req, res) => {
   // console.log(req.params.id);
 
   //   console.log(slider);
-  const slider = await Slider.findById(req.params.id);
+  const slider = await ProductSlider.findById(req.params.id);
 
   if (slider) {
     res.status(200).send(slider);
@@ -126,7 +173,7 @@ sliderRouter.delete(
   isAuth,
   isAdmin,
   expressAsyncHandler(async (req, res) => {
-    const product = await Slider.findById(req.params.id);
+    const product = await ProductSlider.findById(req.params.id);
     if (product) {
       await product.remove();
       res.status(200).send({ message: 'Product Deleted' });
@@ -135,5 +182,10 @@ sliderRouter.delete(
     }
   })
 );
+
+
+
+
+
 
 export default sliderRouter;

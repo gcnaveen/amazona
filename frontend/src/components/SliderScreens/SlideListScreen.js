@@ -86,7 +86,6 @@ export default function SlideListScreen() {
         const { data } = await axios.get(`/api/sliders/admin?page=${page} `, {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
-        console.log(data);
         dispatch({ type: 'FETCH_SUCCESS', payload: data });
       } catch (err) {
         console.log(err);
@@ -98,30 +97,10 @@ export default function SlideListScreen() {
       fetchData();
     }
   }, [page, userInfo, successDelete]);
-  console.log('in side the prices', sliders);
 
   const createHandler = async () => {
-    if (window.confirm('Are you sure to create?')) {
-      try {
-        dispatch({ type: 'CREATE_REQUEST' });
-        const { data } = await axios.post(
-          '/api/sliders',
-          {},
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
-        console.log('give data', data);
-        toast.success('slider created successfully');
-        dispatch({ type: 'CREATE_SUCCESS' });
-        navigate(`/admin/sliders/${data.slider._id}`);
-      } catch (err) {
-        toast.error(getError(error));
-        dispatch({
-          type: 'CREATE_FAIL',
-        });
-      }
-    }
+    navigate('/admin/sliders/createSlide')
+
   };
 
   //   console.log('in side the prices', sliders);
